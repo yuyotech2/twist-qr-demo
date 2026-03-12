@@ -52,14 +52,24 @@
   </head>
   <body>
     
+    <!-- Landing Overlay to force a click before Camera Starts -->
+    <div id="start-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20000; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center;">
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 20px;">AR Mode Ready</h2>
+      <p style="margin-bottom: 40px; color: #aaa; max-width: 80%;">Your phone requires permission to launch the 3D Engine.</p>
+      <button onclick="launchCamera()" style="background: #00f5ff; color: #000; padding: 15px 40px; border-radius: 50px; font-weight: bold; font-size: 1.2rem; border: none; cursor: pointer; box-shadow: 0 0 20px rgba(0,245,255,0.4);">LAUNCH CAMERA</button>
+      <button onclick="window.location.href='index.html'" style="background: transparent; border: none; color: #888; font-size: 1rem; margin-top: 30px; text-decoration: underline;">Cancel</button>
+    </div>
+
     <!-- User Interface Overlay -->
-    <div id="ui-overlay">
+    <div id="ui-overlay" style="display: none;">
       <div class="status-box" id="status-text">Starting Camera...</div>
       <button class="btn-exit" onclick="window.location.href='index.html'">EXIT AR MODE</button>
     </div>
 
-    <!-- The actual 3D Scene running underneath everything -->
-    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/card.mind; filterMinCF:0.1; filterBeta: 10" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" gesture-detector>
+    <!-- The Scene Container (Hidden until start is clicked) -->
+    <div id="scene-container" style="display: none;">
+      <!-- The actual 3D Scene running underneath everything -->
+      <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/card.mind; filterMinCF:0.1; filterBeta: 10; autoStart: true; uiLoading: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" gesture-detector>
       
       <a-assets>
         <!-- The Avatar 3D Model file -->
@@ -73,11 +83,27 @@
         <!-- Placed item with gesture controls to resize and rotate -->
         <a-gltf-model rotation="0 0 0" position="0 0 0.1" scale="0.007 0.007 0.007" src="#avatarModel" gesture-handler="minScale: 0.002; maxScale: 0.03"></a-gltf-model>
       </a-entity>
-    </a-scene>
+      </a-scene>
+    </div>
     
     <script>
-      // AR Interface Logic
-      const sceneEl = document.querySelector('a-scene');
+      function launchCamera() {
+        document.getElementById('start-overlay').style.display = 'none';
+        document.getElementById('ui-overlay').style.display = 'flex';
+        document.getElementById('scene-container').style.display = 'block';
+        
+        // This forces Safari/Chrome to request camera permissions immediately
+        navigator.mediaDevices.getUserMedia({video: true}).then(function(stream) {
+            setupARListeners();
+        }).catch(function(err) {
+            document.getElementById('status-text').innerHTML = "ERROR: Camera Blocked";
+            document.getElementById('status-text').style.borderColor = "red";
+        });
+      }
+
+      function setupARListeners() {
+        // AR Interface Logic
+        const sceneEl = document.querySelector('a-scene');
       const statusText = document.getElementById('status-text');
       const target = document.getElementById('ar-target');
 
@@ -107,6 +133,7 @@
         statusText.style.background = "rgba(0,0,0,0.8)";
         statusText.style.borderColor = "#00f5ff";
       });
+      }
     </script>
   </body>
 </html>
