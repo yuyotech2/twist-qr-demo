@@ -42,6 +42,17 @@ body {
   min-height: 100vh;
 }
 
+/* --- A-FRAME SCROLL BUG FIX --- */
+html, body, html.a-fullscreen, body.a-fullscreen {
+  position: relative !important;
+  height: auto !important;
+  overflow-y: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+}
+
 /* Typography */
 h1, h2, h3 {
   font-weight: 700;
