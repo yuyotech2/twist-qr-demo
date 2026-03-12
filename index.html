@@ -9,56 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- AR Essentials: Optimized for Mobile -->
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js" defer></script>
-    <!-- Gesture Interactions for AR -->
-    <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js" defer></script>
-    <style>
-        #ar-container {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 10000;
-            background: #000;
-        }
-        #mobile-warning {
-            display: none;
-            background: #ffaa00;
-            color: black;
-            padding: 1rem;
-            text-align: center;
-            font-weight: bold;
-            position: fixed;
-            bottom: 0; width: 100%;
-            z-index: 20000;
-        }
-    </style>
 </head>
 <body>
-    <div id="update-banner">TWIST AR ENGINE V4.5 - MOBILE OPTIMIZED</div>
-    <div id="mobile-warning">⚠️ AR Engine works best on Mobile. Please open this site on your phone!</div>
-    
-    <!-- Real AR Viewport -->
-    <div id="ar-container">
-        <div class="ar-ui" style="position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10001; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-            <p id="ar-status" style="color: white; background: rgba(0,0,0,0.7); padding: 12px 24px; border-radius: 30px; border: 1px solid var(--accent-secondary); font-size: 0.9rem;">Initializing Camera...</p>
-            <button class="btn btn-primary" onclick="exitAR()">Back to Studio</button>
-        </div>
-        <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/card.mind; autoStart: false; uiLoading: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" gesture-detector embedded>
-            <a-assets>
-                <a-asset-item id="avatarModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/softbar/scene.gltf"></a-asset-item>
-            </a-assets>
-
-            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-            <!-- Added gesture-handler to allow pinching to scale and dragging to rotate -->
-            <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
-                <a-gltf-model rotation="0 0 0 " position="0 0 0.1" scale="0.005 0.005 0.005" src="#avatarModel" gesture-handler="minScale: 0.001; maxScale: 0.05"></a-gltf-model>
-            </a-entity>
-        </a-scene>
-    </div>
+    <div id="update-banner">TWIST AR ENGINE V5.0 - DEDICATED CAMERA PAGE</div>
 
     <div class="container">
         <header>
@@ -85,7 +38,7 @@
                     <h3 style="color: var(--accent-secondary);">The AR Trigger Card</h3>
                     <p style="margin: 1rem 0; font-size: 0.9rem; text-align: center;"><b>HOW TO USE:</b> Tap the image below. It will activate your phone's camera. Then point it back at this screen to see the Twist!</p>
                     
-                    <div id="sticker-mockup" style="width: 250px; height: 250px; background: white; border-radius: 20px; border: 8px solid var(--accent-secondary); display: flex; align-items: center; justify-content: center; position: relative; margin-top: 1rem; cursor: pointer; box-shadow: 0 0 40px rgba(0, 245, 255, 0.4);" onclick="startAR()">
+                    <div id="sticker-mockup" style="width: 250px; height: 250px; background: white; border-radius: 20px; border: 8px solid var(--accent-secondary); display: flex; align-items: center; justify-content: center; position: relative; margin-top: 1rem; cursor: pointer; box-shadow: 0 0 40px rgba(0, 245, 255, 0.4);" onclick="window.location.href='ar.html'">
                         <img src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/card.png" style="width: 90%; border-radius: 10px;">
                         <div style="position: absolute; top: 40%; background: #ff0055; color: white; padding: 15px 30px; border-radius: 8px; font-weight: 800; font-size: 1.2rem; transform: scale(1); animation: pulse 2s infinite; text-align: center;">TAP HERE<br><span style="font-size: 0.8rem;">TO START CAMERA</span></div>
                     </div>
