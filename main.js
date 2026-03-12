@@ -10,23 +10,40 @@ function startAR() {
     const arContainer = document.getElementById('ar-container');
     arContainer.style.display = 'block';
     
-    // Start AR Engine manually for speed
-    const sceneEl = document.querySelector('a-scene');
-    const arSystem = sceneEl.systems['mindar-image-system'];
-    arSystem.start(); 
+    // Inject AR Engine dynamically to prevent 0x0 canvas bugs on mobile
+    const wrapper = document.getElementById('ar-viewport');
+    wrapper.innerHTML = `
+        <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/card.mind; autoStart: true; uiLoading: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" gesture-detector embedded>
+            <a-assets>
+                <a-asset-item id="avatarModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/softbar/scene.gltf"></a-asset-item>
+            </a-assets>
+
+            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+            <!-- Added gesture-handler to allow pinching to scale and dragging to rotate -->
+            <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
+                <a-gltf-model rotation="0 0 0 " position="0 0 0.1" scale="0.005 0.005 0.005" src="#avatarModel" gesture-handler="minScale: 0.001; maxScale: 0.05"></a-gltf-model>
+            </a-entity>
+        </a-scene>
+    `;
 
     // Visual Status Update
     const status = document.getElementById('ar-status');
-    const target = document.getElementById('ar-target');
     
-    target.addEventListener("targetFound", event => {
-        status.innerText = "Target Found! High-five the character!";
-        status.style.background = "rgba(0, 245, 255, 0.4)";
-    });
-    target.addEventListener("targetLost", event => {
-        status.innerText = "Searching for Sticker...";
-        status.style.background = "rgba(0,0,0,0.7)";
-    });
+    // Wait slightly for the scene target to exist in the DOM
+    setTimeout(() => {
+        const target = document.getElementById('ar-target');
+        if (target) {
+            target.addEventListener("targetFound", event => {
+                status.innerText = "Target Found! Scale & Rotate character!";
+                status.style.background = "rgba(0, 245, 255, 0.4)";
+            });
+            target.addEventListener("targetLost", event => {
+                status.innerText = "Searching for Sticker...";
+                status.style.background = "rgba(0,0,0,0.7)";
+            });
+        }
+    }, 1000);
 }
 
 function exitAR() {
