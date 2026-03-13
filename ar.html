@@ -2,31 +2,68 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Camera Test</title>
+  <title>TwistQR AR</title>
   <style>
-    body { margin: 0; background: #000; }
-    video { width: 100vw; height: 100vh; object-fit: cover; display: block; }
-    #btn { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #00f5ff; color: #000; padding: 20px 40px; border-radius: 50px; font-size: 1.5rem; font-weight: bold; border: none; cursor: pointer; z-index: 999; }
-    #banner { position: fixed; top: 0; width: 100%; background: red; color: white; text-align: center; padding: 5px; font-weight: bold; z-index: 999; font-size: 0.8rem; }
+    body { margin: 0; overflow: hidden; }
+    #banner { position: fixed; top: 0; width: 100%; background: #ff0055; color: white; text-align: center; padding: 5px; font-weight: bold; z-index: 999; font-size: 0.8rem; }
+    #msg { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 30px; border: 2px solid #00f5ff; z-index: 999; font-weight: bold; font-size: 0.9rem; white-space: nowrap; }
+    #exit { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #ff0055; color: white; border: none; padding: 14px 35px; border-radius: 50px; font-size: 1rem; font-weight: bold; z-index: 999; cursor: pointer; }
   </style>
+  <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@1.3.0/dist/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
 <body>
-  <div id="banner">V10 - PURE CAMERA TEST</div>
-  <video id="video" autoplay playsinline></video>
-  <button id="btn" onclick="startCam()">TAP TO START CAMERA</button>
+  <div id="banner">TWISTQR AR - POINT AT HIRO MARKER</div>
+  <div id="msg">📷 Point camera at the Hiro marker!</div>
+  <button id="exit" onclick="window.location.href='index.html'">EXIT</button>
+
+  <a-scene
+    embedded
+    arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+    vr-mode-ui="enabled: false"
+    renderer="logarithmicDepthBuffer: true; antialias: true;">
+
+    <a-marker preset="hiro" id="marker">
+      <!-- Spinning purple box -->
+      <a-box
+        position="0 0.5 0"
+        scale="0.8 0.8 0.8"
+        material="color: #8a2be2; opacity: 0.9;"
+        animation="property: rotation; to: 0 360 0; dur: 2000; loop: true; easing: linear;">
+      </a-box>
+      <!-- Glowing ring at base -->
+      <a-torus
+        position="0 0.05 0"
+        radius="0.6"
+        radius-tubular="0.03"
+        material="color: #00f5ff; emissive: #00f5ff;"
+        animation="property: rotation; from: 90 0 0; to: 90 360 0; dur: 3000; loop: true; easing: linear;">
+      </a-torus>
+      <!-- TWIST Text -->
+      <a-text
+        value="TWIST"
+        position="0 1.4 0"
+        align="center"
+        color="#00f5ff"
+        scale="1.5 1.5 1.5"
+        animation="property: position; from: 0 1.4 0; to: 0 1.7 0; dur: 1000; loop: true; dir: alternate; easing: easeInOutSine;">
+      </a-text>
+    </a-marker>
+
+    <a-entity camera></a-entity>
+  </a-scene>
 
   <script>
-    function startCam() {
-      document.getElementById('btn').style.display = 'none';
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        .then(stream => {
-          document.getElementById('video').srcObject = stream;
-        })
-        .catch(err => {
-          document.getElementById('btn').innerText = 'ERROR: ' + err.message;
-          document.getElementById('btn').style.display = 'block';
-        });
-    }
+    document.getElementById('marker').addEventListener('markerFound', () => {
+      document.getElementById('msg').innerText = '✨ MAGIC! Your item is alive!';
+      document.getElementById('msg').style.borderColor = '#8a2be2';
+      document.getElementById('msg').style.background = 'rgba(138,43,226,0.8)';
+    });
+    document.getElementById('marker').addEventListener('markerLost', () => {
+      document.getElementById('msg').innerText = '📷 Point camera at the Hiro marker!';
+      document.getElementById('msg').style.borderColor = '#00f5ff';
+      document.getElementById('msg').style.background = 'rgba(0,0,0,0.8)';
+    });
   </script>
 </body>
 </html>
