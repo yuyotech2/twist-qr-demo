@@ -3,138 +3,53 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TwistQR | Augmented Reality</title>
-    <!-- AR Frameworks -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
-    
     <style>
       body { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: sans-serif; }
-      
-      #ui-overlay {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 10000;
-        pointer-events: none; /* Let touches pass through to A-Frame */
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 40px 20px;
-        box-sizing: border-box;
-      }
-      
-      .btn-exit {
-        pointer-events: auto; /* Buttons must be clickable */
-        background: #ff0055;
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        border-radius: 50px;
-        font-weight: 800;
-        align-self: center;
-        cursor: pointer;
-        font-size: 1.1rem;
-        box-shadow: 0 4px 15px rgba(255, 0, 85, 0.5);
-      }
-      
-      .status-box {
-        align-self: center;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 15px 25px;
-        border-radius: 30px;
-        text-align: center;
-        border: 2px solid #00f5ff;
-        font-size: 1rem;
-        font-weight: bold;
-      }
+      #ui-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 40px 20px; box-sizing: border-box; }
+      .btn-exit { pointer-events: auto; background: #ff0055; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: 800; align-self: center; cursor: pointer; font-size: 1.1rem; }
+      .status-box { align-self: center; background: rgba(0,0,0,0.8); color: white; padding: 15px 25px; border-radius: 30px; text-align: center; border: 2px solid #00f5ff; font-size: 1rem; font-weight: bold; }
     </style>
   </head>
   <body>
-    <!-- Update Banner so you know when GitHub actually updates -->
-    <div id="update-banner" style="position: fixed; top: 0; left: 0; width: 100%; background: #ff0055; color: white; text-align: center; font-weight: bold; padding: 5px; z-index: 30000; font-family: sans-serif; font-size: 0.8rem;">
-      V6.0 - THE FINAL BOSS FIX
-    </div>
-    
-    <!-- Landing Overlay to force a click before Camera Starts -->
-    <div id="start-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20000; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center;">
-      <h2 style="font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 20px;">AR Mode Ready</h2>
-      <p style="margin-bottom: 40px; color: #aaa; max-width: 80%;">Your phone requires permission to launch the 3D Engine.</p>
-      <button onclick="launchCamera()" style="background: #00f5ff; color: #000; padding: 15px 40px; border-radius: 50px; font-weight: bold; font-size: 1.2rem; border: none; cursor: pointer; box-shadow: 0 0 20px rgba(0,245,255,0.4);">LAUNCH CAMERA</button>
-      <button onclick="window.location.href='index.html'" style="background: transparent; border: none; color: #888; font-size: 1rem; margin-top: 30px; text-decoration: underline;">Cancel</button>
+    <div id="update-banner" style="position:fixed;top:0;left:0;width:100%;background:#ff0055;color:white;text-align:center;font-weight:bold;padding:5px;z-index:30000;font-size:0.8rem;">V6.0 - CAMERA FINAL FIX</div>
+
+    <div id="start-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:20000;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;text-align:center;">
+      <h2 style="font-size:2rem;margin-bottom:20px;">AR Mode Ready</h2>
+      <p style="margin-bottom:40px;color:#aaa;max-width:80%;">Tap the button below to launch your camera.</p>
+      <button onclick="launchCamera()" style="background:#00f5ff;color:#000;padding:15px 40px;border-radius:50px;font-weight:bold;font-size:1.2rem;border:none;cursor:pointer;">LAUNCH CAMERA</button>
+      <button onclick="window.location.href='index.html'" style="background:transparent;border:none;color:#888;font-size:1rem;margin-top:30px;text-decoration:underline;">Cancel</button>
     </div>
 
-    <!-- User Interface Overlay -->
-    <div id="ui-overlay" style="display: none;">
+    <div id="ui-overlay" style="display:none;">
       <div class="status-box" id="status-text">Starting Camera...</div>
       <button class="btn-exit" onclick="window.location.href='index.html'">EXIT AR MODE</button>
     </div>
 
-    <!-- The Scene Container -->
-    <div id="scene-container">
-      <!-- The actual 3D Scene running underneath everything -->
-      <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/card.mind; filterMinCF:0.1; filterBeta: 10; autoStart: false; uiLoading: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" gesture-detector>
-      
+    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/card.mind; autoStart: false; uiLoading: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" gesture-detector>
       <a-assets>
-        <!-- The Avatar 3D Model file -->
         <a-asset-item id="avatarModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/softbar/scene.gltf"></a-asset-item>
       </a-assets>
-
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-      <!-- Target 0 = The physical image trigger -->
       <a-entity mindar-image-target="targetIndex: 0" id="ar-target">
-        <!-- Placed item with gesture controls to resize and rotate -->
         <a-gltf-model rotation="0 0 0" position="0 0 0.1" scale="0.007 0.007 0.007" src="#avatarModel" gesture-handler="minScale: 0.002; maxScale: 0.03"></a-gltf-model>
       </a-entity>
-      </a-scene>
-    </div>
-    
+    </a-scene>
+
     <script>
       function launchCamera() {
         document.getElementById('start-overlay').style.display = 'none';
         document.getElementById('ui-overlay').style.display = 'flex';
-        
-        // Start AR System correctly directly through MindAR
         const sceneEl = document.querySelector('a-scene');
-        const arSystem = sceneEl.systems['mindar-image-system'];
-        
-        setupARListeners();
-        arSystem.start(); // This triggers the camera permission and engine simultaneously
-      }
-
-      function setupARListeners() {
-        // AR Interface Logic
-        const sceneEl = document.querySelector('a-scene');
-      const statusText = document.getElementById('status-text');
-      const target = document.getElementById('ar-target');
-
-      // Update UI when camera turns on
-      sceneEl.addEventListener("arReady", (event) => {
-        statusText.innerHTML = "Camera Ready! Point at the White Card.";
-        statusText.style.color = "white";
-        statusText.style.borderColor = "#00f5ff"; // Cyan border
-      });
-
-      // Update UI if camera fails
-      sceneEl.addEventListener("arError", (event) => {
-        statusText.innerHTML = "Error: Camera Access Denied.";
-        statusText.style.borderColor = "red";
-      });
-
-      // Update UI when sticker/item is recognized
-      target.addEventListener("targetFound", (event) => {
-        statusText.innerHTML = "MAGIC! Pinch to zoom, drag to spin.";
-        statusText.style.background = "rgba(138, 43, 226, 0.8)"; // Electric Violet
-        statusText.style.borderColor = "white";
-      });
-
-      // Update UI when user looks away
-      target.addEventListener("targetLost", (event) => {
-        statusText.innerHTML = "Looking for the White Card...";
-        statusText.style.background = "rgba(0,0,0,0.8)";
-        statusText.style.borderColor = "#00f5ff";
-      });
+        sceneEl.systems['mindar-image-system'].start();
+        const statusText = document.getElementById('status-text');
+        const target = document.getElementById('ar-target');
+        sceneEl.addEventListener("arReady", () => { statusText.innerHTML = "Camera Ready! Point at the White Card."; });
+        sceneEl.addEventListener("arError", () => { statusText.innerHTML = "Error: Please allow camera access."; statusText.style.borderColor = "red"; });
+        target.addEventListener("targetFound", () => { statusText.innerHTML = "MAGIC! Pinch to zoom, drag to spin!"; statusText.style.background = "rgba(138,43,226,0.8)"; });
+        target.addEventListener("targetLost", () => { statusText.innerHTML = "Looking for the White Card..."; statusText.style.background = "rgba(0,0,0,0.8)"; });
       }
     </script>
   </body>
