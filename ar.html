@@ -1,33 +1,32 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TwistQR | AR</title>
-    <style>
-      * { margin: 0; padding: 0; }
-      body { overflow: hidden; background: #000; font-family: sans-serif; }
-      /* THIS IS THE FIX - forces the camera video to be visible */
-      video { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: cover !important; z-index: 0 !important; }
-      canvas { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; z-index: 1 !important; }
-      #msg { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 30px; border: 2px solid #00f5ff; z-index: 999; font-weight: bold; text-align: center; font-size: 0.95rem; }
-      #exit { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #ff0055; color: white; border: none; padding: 14px 35px; border-radius: 50px; font-size: 1rem; font-weight: bold; z-index: 999; cursor: pointer; }
-      #banner { position: fixed; top: 0; left: 0; width: 100%; background: #ff0055; color: white; text-align: center; font-weight: bold; padding: 5px; z-index: 1000; font-size: 0.75rem; }
-    </style>
-    <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@1.3.0/dist/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-  </head>
-  <body>
-    <div id="banner">V9.0 - CAMERA VISIBLE FIX</div>
-    <div id="msg">📷 Point at the Hiro marker below!</div>
-    <button id="exit" onclick="window.location.href='index.html'">EXIT</button>
-    <a-scene embedded arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false" renderer="logarithmicDepthBuffer: true;">
-      <a-marker preset="hiro">
-        <a-box position="0 0.5 0" material="color: #8a2be2;" scale="1 1 1"
-          animation="property: rotation; to: 0 360 0; dur: 3000; loop: true; easing: linear;">
-        </a-box>
-        <a-text value="TWIST AR" position="0 1.5 0" align="center" color="#00f5ff" scale="2 2 2"></a-text>
-      </a-marker>
-      <a-entity camera></a-entity>
-    </a-scene>
-  </body>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera Test</title>
+  <style>
+    body { margin: 0; background: #000; }
+    video { width: 100vw; height: 100vh; object-fit: cover; display: block; }
+    #btn { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #00f5ff; color: #000; padding: 20px 40px; border-radius: 50px; font-size: 1.5rem; font-weight: bold; border: none; cursor: pointer; z-index: 999; }
+    #banner { position: fixed; top: 0; width: 100%; background: red; color: white; text-align: center; padding: 5px; font-weight: bold; z-index: 999; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div id="banner">V10 - PURE CAMERA TEST</div>
+  <video id="video" autoplay playsinline></video>
+  <button id="btn" onclick="startCam()">TAP TO START CAMERA</button>
+
+  <script>
+    function startCam() {
+      document.getElementById('btn').style.display = 'none';
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(stream => {
+          document.getElementById('video').srcObject = stream;
+        })
+        .catch(err => {
+          document.getElementById('btn').innerText = 'ERROR: ' + err.message;
+          document.getElementById('btn').style.display = 'block';
+        });
+    }
+  </script>
+</body>
 </html>
