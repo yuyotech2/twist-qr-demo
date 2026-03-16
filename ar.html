@@ -1,199 +1,247 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>TwistQR | AR Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>TwistQR | Professional AR Hub</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { background: #000; font-family: 'Inter', sans-serif; color: white; height: 100vh; overflow: hidden; }
-
-    /* UI Layers */
-    #main-ui { position: relative; height: 100vh; display: flex; flex-direction: column; z-index: 10; background: #080810; transition: transform 0.5s ease; }
-    #ar-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: none; }
-    #camera-feed { width: 100%; height: 100%; object-fit: cover; }
-    
-    /* Header */
-    #header { padding: 15px; border-bottom: 2px solid #8a2be2; text-align: center; background: rgba(8,8,16,0.9); }
-    #header h1 { font-size: 1.2rem; letter-spacing: 3px; color: #00f5ff; }
-    #exit-app { position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.1); border: 1px solid #444; color: #fff; padding: 5px 12px; border-radius: 50px; cursor: pointer; }
-
-    /* Preview Area */
-    #preview-hub { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-    .portal { width: 280px; height: 280px; border-radius: 50%; border: 3px solid #8a2be2; box-shadow: 0 0 30px #8a2be2; display: flex; align-items: center; justify-content: center; position: relative; }
-    
-    model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
-    #img-ghost-preview { max-width: 80%; max-height: 80%; border: 3px solid #00f5ff; box-shadow: 0 0 20px #00f5ff; display: none; animation: float 3s ease-in-out infinite; }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-
-    /* Buttons */
-    .launch-btn { 
-      background: linear-gradient(135deg, #00f5ff, #8a2be2);
-      color: #fff; border: none; padding: 15px 40px; border-radius: 50px;
-      font-weight: 800; font-size: 1.1rem; letter-spacing: 2px;
-      margin-top: 25px; box-shadow: 0 10px 30px rgba(138,43,226,0.5);
-      cursor: pointer;
+    :root {
+      --primary: #00f5ff;
+      --secondary: #8a2be2;
+      --work-accent: #4caf50;
+      --bg: #080810;
     }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif; color: white; height: 100vh; overflow: hidden; }
 
-    /* Selector Panel */
-    #selector { padding: 20px 0 40px; border-top: 2px solid #00f5ff; background: #0a0a18; }
+    /* UI Containers */
+    #main-menu { position: relative; height: 100vh; display: flex; flex-direction: column; z-index: 10; background: var(--bg); transition: 0.3s; }
+    #ar-camera-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000; background: #000; display: none; }
+    #v-feed { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+
+    /* Header & Mode Selector */
+    #header { padding: 15px; border-bottom: 2px solid var(--primary); text-align: center; background: rgba(0,0,0,0.95); }
+    #header h1 { font-size: 0.9rem; letter-spacing: 4px; color: var(--primary); margin-bottom: 12px; font-weight: 900; }
+    
+    .mode-toggle { display: flex; background: rgba(255,255,255,0.05); border-radius: 50px; padding: 4px; width: 300px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1); }
+    .mode-btn { flex: 1; padding: 12px; border-radius: 50px; border: none; background: none; color: #666; font-weight: 900; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; transition: 0.3s; }
+    .mode-btn.active.play { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+    .mode-btn.active.work { background: linear-gradient(135deg, var(--work-accent), #2e7d32); color: white; }
+
+    /* Preview Hub */
+    #preview-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .preview-box { width: 280px; height: 280px; border-radius: 40px; border: 2px solid rgba(138,43,226,0.3); position: relative; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(138,43,226,0.05) 0%, transparent 70%); }
+    model-viewer { width: 100%; height: 100%; }
+    
+    .btn-launch { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 16px 50px; border-radius: 50px; font-weight: 900; font-size: 1.1rem; letter-spacing: 2px; margin-top: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); cursor: pointer; }
+
+    /* Main Menu Scroller */
+    #selector-strip { background: rgba(0,0,0,0.4); padding: 20px 0 40px; border-top: 1px solid rgba(255,255,255,0.05); }
     .scroller { display: flex; gap: 15px; overflow-x: auto; padding: 0 20px; }
     .scroller::-webkit-scrollbar { display: none; }
-    .card { flex: 0 0 90px; height: 110px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
-    .card.active { border-color: #00f5ff; background: rgba(0,245,255,0.1); transform: translateY(-5px); }
-    .card .icon { font-size: 1.8rem; margin-bottom: 5px; }
-    .card .label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: #888; }
-    .card.active .label { color: #fff; }
+    
+    .char-card { flex: 0 0 90px; height: 105px; background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.1); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .char-card.active.play { border-color: var(--primary); background: rgba(0,245,255,0.1); }
+    .char-card.active.work { border-color: var(--work-accent); background: rgba(76,175,80,0.1); }
+    .char-card .icon { font-size: 1.8rem; margin-bottom: 5px; }
+    .char-card .name { font-size: 0.6rem; color: #555; text-transform: uppercase; font-weight: 800; }
 
-    /* Live AR Overlay UI */
-    #ar-controls { position: absolute; bottom: 40px; width: 100%; display: flex; justify-content: center; gap: 20px; pointer-events: none; }
-    .ar-ui-btn { pointer-events: auto; background: white; color: black; border: none; padding: 12px 25px; border-radius: 50px; font-weight: 800; }
-    #sticker-obj { position: absolute; pointer-events: auto; touch-action: none; display: none; }
-    #status-msg { position: absolute; top: 100px; width: 100%; text-align: center; color: #00f5ff; font-weight: 900; text-shadow: 0 2px 10px #000; pointer-events: none; }
+    /* AR View Interface (The Magic Part) */
+    #ar-canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
+    
+    /* Live Items being placed */
+    .ar-object { position: absolute; width: 130px; pointer-events: auto; touch-action: none; filter: drop-shadow(0 0 15px rgba(255,255,255,0.5)); transition: transform 0.1s; }
+    .ar-object.selected { border: 2px solid var(--primary); border-radius: 10px; padding: 5px; }
+
+    /* In-Camera Item Switcher */
+    #in-cam-selector { 
+      position: absolute; bottom: 110px; left: 0; width: 100%; height: 80px; 
+      display: flex; gap: 12px; overflow-x: auto; padding: 0 20px; 
+      pointer-events: auto; z-index: 1005; backdrop-filter: blur(10px);
+      background: rgba(0,0,0,0.4); align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .cam-item { 
+      flex: 0 0 60px; height: 60px; background: rgba(255,255,255,0.1); 
+      border-radius: 15px; display: flex; align-items: center; justify-content: center; 
+      font-size: 1.5rem; border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .ar-bottom-controls { 
+      position: absolute; bottom: 30px; width: 100%; display: flex; 
+      justify-content: center; gap: 15px; pointer-events: auto; z-index: 1005;
+    }
+    .ar-util-btn { 
+      background: rgba(0,0,0,0.8); border: 2px solid white; color: white; 
+      padding: 12px 25px; border-radius: 50px; font-weight: 900; font-size: 0.8rem;
+    }
+    #ar-status { position: absolute; top: 100px; width: 100%; text-align: center; color: var(--primary); font-weight: 900; letter-spacing: 2px; }
   </style>
 </head>
 <body>
 
-  <!-- MAIN MENU UI -->
-  <div id="main-ui">
+  <!-- PAGE 1: MENU -->
+  <div id="main-menu">
     <header id="header">
-      <button id="exit-app" onclick="window.location.href='index.html'">←</button>
-      <h1>TWIST AR</h1>
+      <button onclick="window.location.href='index.html'" style="position:absolute; left:18px; top:12px; background:none; border:none; color:#444; font-size:1.5rem;">✕</button>
+      <h1>TWIST AR PRO</h1>
+      <div class="mode-toggle">
+        <button id="mode-play" class="mode-btn active play" onclick="setMode('play')">PLAY MODE</button>
+        <button id="mode-work" class="mode-btn" onclick="setMode('work')">WORK MODE</button>
+      </div>
     </header>
 
-    <div id="preview-hub">
-      <div class="portal">
-        <model-viewer id="mv" src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls auto-rotate autoplay shadow-intensity="1">
-          <button id="real-ar-btn" slot="ar-button" style="display:none;"></button>
+    <div id="preview-container">
+      <div class="preview-box">
+        <model-viewer id="main-view" src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" ar ar-modes="webxr" camera-controls auto-rotate autoplay shadow-intensity="1">
+          <button id="native-ar-btn" slot="ar-button" style="display:none;"></button>
         </model-viewer>
-        <img id="img-ghost-preview" src="">
       </div>
-      <p id="preview-label" style="margin-top:15px; font-weight:700; color:#888;">🧑‍🚀 Astronaut Selected</p>
-      <button class="launch-btn" onclick="startAR()">⚡ LAUNCH AR</button>
+      <button class="btn-launch" onclick="enterAR()">🚀 START DESIGNING ROOM</button>
     </div>
 
-    <div id="selector">
-      <div class="scroller">
-        <!-- New Upload -->
-        <div class="card" style="border-style:dashed; border-color:#ff0055;" onclick="document.getElementById('upload-input').click()">
-          <span class="icon">📸</span>
-          <span class="label">Upload</span>
-        </div>
-        <input type="file" id="upload-input" accept="image/*" style="display:none" onchange="uploadImage(this)">
-        
-        <div class="card active" onclick="pick(this, 'Astronaut', 'https://modelviewer.dev/shared-assets/models/Astronaut.glb', '🧑‍🚀')">
-          <span class="icon">🧑‍🚀</span><span class="label">Astronaut</span>
-        </div>
-        <div class="card" onclick="pick(this, 'Robot', 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', '🤖')">
-          <span class="icon">🤖</span><span class="label">Robot</span>
-        </div>
-        <div class="card" onclick="pick(this, 'Fox', 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb', '🦊')">
-          <span class="icon">🦊</span><span class="label">Fox</span>
-        </div>
-        <div class="card" onclick="pick(this, 'Duck', 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', '🦆')">
-          <span class="icon">🦆</span><span class="label">Duck</span>
-        </div>
+    <div id="selector-strip">
+      <div id="scroller" class="scroller">
+        <!-- Will be filled by JS based on mode -->
       </div>
     </div>
   </div>
 
-  <!-- LIVE AR OVERLAY -->
-  <div id="ar-view">
-    <video id="camera-feed" autoplay playsinline></video>
-    <div id="status-msg">📷 POINT AND TAP TO PLACE</div>
+  <!-- PAGE 2: LIVE MULTI-ITEM CAMERA -->
+  <div id="ar-camera-view">
+    <video id="v-feed" autoplay playsinline></video>
     
-    <!-- This is the 'Alive' 2D Image Object -->
-    <div id="sticker-obj">
-      <img id="sticker-img" src="" style="width:100px; filter: drop-shadow(0 0 10px #00f5ff);">
+    <!-- This is where multiple items will move -->
+    <div id="ar-canvas-layer"></div>
+
+    <div id="ar-status">MULTI-OBJECT MODE ACTIVE</div>
+
+    <!-- The In-Camera Switcher -->
+    <div id="in-cam-selector">
+        <div class="cam-item" onclick="addItem('🧑‍🚀')">🧑‍🚀</div>
+        <div class="cam-item" onclick="addItem('🤖')">🤖</div>
+        <div class="cam-item" onclick="addItem('🦊')">🦊</div>
+        <div class="cam-item" onclick="addItem('🪑')">🪑</div>
+        <div class="cam-item" onclick="addItem('🦆')">🦆</div>
+        <div class="cam-item" onclick="document.getElementById('file-in').click()">🖼️</div>
     </div>
 
-    <div id="ar-controls">
-      <button class="ar-ui-btn" onclick="stopAR()" style="background:#ff0055; color:white;">✕ CLOSE</button>
-      <button class="ar-ui-btn" onclick="alert('📸 Snapshot saved to your gallery!')">📸 PHOTO</button>
+    <div class="ar-bottom-controls">
+        <button class="ar-util-btn" onclick="clearAll()" style="border-color: #ff4444; color: #ff4444;">CLEAR ALL</button>
+        <button class="ar-util-btn" onclick="exitAR()" style="background: #ff4444;">✕ EXIT</button>
+        <button class="ar-util-btn" onclick="alert('📸 Layout saved to Gallery!')">SAVE</button>
     </div>
+
+    <input type="file" id="file-in" style="display:none" onchange="uploadToAR(this)">
   </div>
 
   <script>
-    const mainUI = document.getElementById('main-ui');
-    const arView = document.getElementById('ar-view');
-    const mv = document.getElementById('mv');
-    const ghost = document.getElementById('img-ghost-preview');
-    const stickerObj = document.getElementById('sticker-obj');
-    const stickerImg = document.getElementById('sticker-img');
-    const video = document.getElementById('camera-feed');
-    const label = document.getElementById('preview-label');
+    const menu = document.getElementById('main-menu');
+    const camera = document.getElementById('ar-camera-view');
+    const canvas = document.getElementById('ar-canvas-layer');
+    const vFeed = document.getElementById('v-feed');
+    const mv = document.getElementById('main-view');
+    const scroller = document.getElementById('scroller');
+    
+    let currentMode = 'play';
+    const items = {
+        play: [
+            { name: 'Astronaut', icon: '🧑‍🚀', src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb' },
+            { name: 'Robot', icon: '🤖', src: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb' },
+            { name: 'Fox', icon: '🦊', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb' }
+        ],
+        work: [
+            { name: 'Luxury Chair', icon: '🪑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb' },
+            { name: 'Duck Decor', icon: '🦆', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb' }
+        ]
+    };
 
-    let currentMode = '3d'; // '3d' or '2d'
-
-    function pick(el, name, src, icon) {
-      currentMode = '3d';
-      document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      mv.style.display = 'block';
-      ghost.style.display = 'none';
-      mv.src = src;
-      label.innerText = icon + " " + name + " Selected";
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('mode-play').className = 'mode-btn ' + (mode === 'play' ? 'active play' : '');
+        document.getElementById('mode-work').className = 'mode-btn ' + (mode === 'work' ? 'active work' : '');
+        renderScroller();
     }
 
-    function uploadImage(input) {
-      if (input.files && input.files[0]) {
-        currentMode = '2d';
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-          input.parentElement.classList.add('active');
-          mv.style.display = 'none';
-          ghost.style.display = 'block';
-          ghost.src = e.target.result;
-          stickerImg.src = e.target.result;
-          label.innerText = "📸 Custom Photo Ready";
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
+    function renderScroller() {
+        scroller.innerHTML = '';
+        items[currentMode].forEach(item => {
+            let card = document.createElement('div');
+            card.className = 'char-card';
+            card.innerHTML = `<span class="icon">${item.icon}</span><span class="name">${item.name}</span>`;
+            card.onclick = () => {
+                document.querySelectorAll('.char-card').forEach(c => c.classList.remove('active', 'play', 'work'));
+                card.classList.add('active', currentMode);
+                mv.src = item.src;
+            };
+            scroller.appendChild(card);
+        });
+        scroller.firstChild.click();
     }
 
-    async function startAR() {
-      if (currentMode === '3d') {
-        // Native 3D AR
-        document.getElementById('real-ar-btn').click();
-      } else {
-        // Custom 2D AR System (Self-Built)
-        mainUI.style.display = 'none';
-        arView.style.display = 'block';
+    async function enterAR() {
+        menu.style.display = 'none';
+        camera.style.display = 'block';
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        vFeed.srcObject = stream;
+        // Start with one item
+        addItem(currentMode === 'play' ? '🧑‍🚀' : '🪑');
+    }
+
+    function exitAR() {
+        menu.style.display = 'flex';
+        camera.style.display = 'none';
+        if (vFeed.srcObject) vFeed.srcObject.getTracks().forEach(t => t.stop());
+        clearAll();
+    }
+
+    // MULTI-ITEM LOGIC
+    let itemID = 0;
+    function addItem(iconOrSrc) {
+        itemID++;
+        const obj = document.createElement('div');
+        obj.className = 'ar-object';
+        obj.id = 'item-' + itemID;
+        obj.style.left = '50%';
+        obj.style.top = '40%';
         
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-          video.srcObject = stream;
-          stickerObj.style.display = 'block';
-          stickerObj.style.left = '50%';
-          stickerObj.style.top = '50%';
-          stickerObj.style.transform = 'translate(-50%, -50%)';
-        } catch (err) {
-          alert("Camera Error: Please allow camera access.");
-          stopAR();
+        if (iconOrSrc.startsWith('data:image')) {
+            obj.innerHTML = `<img src="${iconOrSrc}" style="width:100%; border-radius:10px;">`;
+        } else {
+            obj.innerHTML = `<div style="font-size: 5rem; text-align: center;">${iconOrSrc}</div>`;
         }
-      }
+
+        canvas.appendChild(obj);
+        makeDraggable(obj);
     }
 
-    function stopAR() {
-      mainUI.style.display = 'flex';
-      arView.style.display = 'none';
-      const stream = video.srcObject;
-      if (stream) stream.getTracks().forEach(track => track.stop());
+    function clearAll() { canvas.innerHTML = ''; }
+
+    function uploadToAR(input) {
+        if (input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => addItem(e.target.result);
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
-    // Touch interaction for 2D AR sticker
-    let isDragging = false;
-    let stickerScale = 1;
+    function makeDraggable(el) {
+        let dragging = false;
+        el.addEventListener('touchstart', (e) => { 
+            dragging = true; 
+            document.querySelectorAll('.ar-object').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+        });
+        window.addEventListener('touchmove', (e) => {
+            if (!dragging) return;
+            const t = e.touches[0];
+            el.style.left = (t.clientX - 65) + 'px';
+            el.style.top = (t.clientY - 65) + 'px';
+        });
+        window.addEventListener('touchend', () => { dragging = false; });
+    }
 
-    stickerObj.addEventListener('touchstart', (e) => { isDragging = true; });
-    window.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      const t = e.touches[0];
-      stickerObj.style.left = t.clientX + 'px';
-      stickerObj.style.top = t.clientY + 'px';
-    });
-    window.addEventListener('touchend', () => { isDragging = false; });
+    setMode('play');
   </script>
 </body>
 </html>
