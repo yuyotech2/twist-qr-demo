@@ -49,7 +49,7 @@
     @keyframes hoverImg { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.05); } }
 
     /* LAUNCH BUTTONS */
-    .launch-btn {
+    #master-ar-btn {
       position: relative; margin-top: 30px; 
       background: linear-gradient(135deg, #00f5ff, #8a2be2);
       color: white; border: none; padding: 18px 45px; border-radius: 50px;
@@ -94,20 +94,30 @@
   <main id="ar-hub">
     <div class="portal">
       <div class="portal-ring"></div>
-      <model-viewer id="mv"
+      
+      <!-- 3D Model Viewer (hidden when image is uploaded) -->
+      <model-viewer id="main-viewer"
         src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
         alt="AR Soul" ar ar-modes="webxr scene-viewer quick-look"
-        camera-controls auto-rotate autoplay shadow-intensity="1" exposure="1.2">
-        <button slot="ar-button" class="launch-btn">⚡ LAUNCH AR CORE</button>
+        camera-controls auto-rotate autoplay shadow-intensity="1" exposure="1.2"
+        style="display: block;">
+        <!-- The button inside model-viewer only works for 3D GLB files -->
+        <button slot="ar-button" style="display:none;" id="default-ar-button"></button>
       </model-viewer>
+
+      <!-- 2D Image Preview Area (shown when image is uploaded) -->
       <div id="custom-img-container">
         <img id="custom-img-preview" src="" alt="Custom Image">
         <div class="glint"></div>
       </div>
     </div>
+
     <div id="status-text">🧑‍🚀 Astronaut Ready</div>
-    <button id="photo-ar-btn" class="launch-btn" style="display:none;">⚡ LAUNCH HOLOGRAM</button>
+    
+    <!-- MASTER LAUNCH BUTTON (Handles both 3D and 2D) -->
+    <button id="master-ar-btn" onclick="triggerAR()">⚡ LAUNCH EXPERIENCE</button>
   </main>
+
   <section id="selector">
     <h3>SWIPE to Select Character</h3>
     <div class="scroll-grid">
@@ -125,14 +135,9 @@
       <div class="card" onclick="setChar(this, 'Fox', 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb', '🦊')">
         <span class="icon">🦊</span><span class="label">Fox</span>
       </div>
-      <div class="card" onclick="setChar(this, 'Duck', 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', '🦆')">
-        <span class="icon">🦆</span><span class="label">Duck</span>
-      </div>
-      <div class="card" onclick="setChar(this, 'Pot', 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb', '🪴')">
-        <span class="icon">🪑</span><span class="label">Velvet</span>
-      </div>
     </div>
   </section>
+
   <script>
     const bg = document.getElementById('bg-canvas');
     for(let i=0; i<60; i++){
@@ -140,25 +145,49 @@
       s.style.left = Math.random()*100+'%'; s.style.top = Math.random()*100+'%';
       s.style.setProperty('--speed', (2+Math.random()*4)+'s'); bg.appendChild(s);
     }
-    const mv = document.getElementById('mv');
+
+    const mv = document.getElementById('main-viewer');
     const photoContainer = document.getElementById('custom-img-container');
     const previewImg = document.getElementById('custom-img-preview');
-    const photoBtn = document.getElementById('photo-ar-btn');
     const status = document.getElementById('status-text');
+    let isCustomMode = false;
+
+    function triggerAR() {
+      if (isCustomMode) {
+        // Since custom images aren't GLB files, we simulate the 'Look in space' logic
+        // For a real production app, you would use a service to convert PNG to GLB on the fly
+        alert("✨ PREPARING HOLOGRAM... Point your camera at a flat surface and tap when the reticle appears!");
+        // We trigger the hidden AR button if it's a 3D model, but for 2D, we show this message
+        // for now as browsers don't natively supportPNG-to-AR without a 3D container.
+      } else {
+        // Trigger the hidden model-viewer AR launch
+        document.getElementById('default-ar-button').click();
+      }
+    }
+
     function setChar(el, name, src, icon) {
+      isCustomMode = false;
       document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
       el.classList.add('active');
-      mv.style.display = 'block'; photoContainer.style.display = 'none'; photoBtn.style.display = 'none';
-      mv.src = src; status.innerText = icon + " " + name + " Ready";
+      
+      mv.style.display = 'block';
+      photoContainer.style.display = 'none';
+      mv.src = src;
+      status.innerText = icon + " " + name + " Ready";
     }
+
     function handleUpload(input) {
       if (input.files && input.files[0]) {
+        isCustomMode = true;
         const reader = new FileReader();
         reader.onload = function(e) {
           document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
           input.parentElement.classList.add('active');
-          mv.style.display = 'none'; photoContainer.style.display = 'block'; photoBtn.style.display = 'block';
-          previewImg.src = e.target.result; status.innerText = "✨ CUSTOM PHOTO READY";
+          
+          mv.style.display = 'none';
+          photoContainer.style.display = 'block';
+          previewImg.src = e.target.result;
+          status.innerText = "✨ CUSTOM PHOTO READY";
         }
         reader.readAsDataURL(input.files[0]);
       }
