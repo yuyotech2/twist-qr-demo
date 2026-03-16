@@ -2,148 +2,86 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TwistQR | Augmented Reality</title>
+  <title>TwistQR | AR Creator</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { background: #080810; font-family: 'Inter', system-ui, -apple-system, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    body { background: #080810; font-family: 'Inter', system-ui, sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-    /* Cosmic Background Animation */
-    #bg-canvas {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at 50% 50%, #1a1a3a 0%, #080810 100%);
-      z-index: -1;
-    }
-    .stars {
-      position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; opacity: 0.3;
-      animation: twinkle var(--speed) linear infinite;
-    }
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.3; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.5); }
-    }
+    /* Background Stars */
+    #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, #1a1a3a 0%, #080810 100%); z-index: -1; }
+    .stars { position: absolute; width: 2px; height: 2px; background: white; border-radius: 50%; opacity: 0.3; animation: twinkle var(--speed) linear infinite; }
+    @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } }
 
-    /* Header & Navigation */
+    /* Header */
     #header {
-      position: relative; z-index: 10;
-      background: rgba(8,8,16,0.85); backdrop-filter: blur(12px);
-      padding: 16px 20px; text-align: center;
-      border-bottom: 1px solid rgba(0,245,255,0.2);
-      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+      z-index: 10; background: rgba(8,8,16,0.85); backdrop-filter: blur(12px);
+      padding: 16px 20px; text-align: center; border-bottom: 1px solid rgba(0,245,255,0.2);
     }
     #header h1 {
-      font-size: 1.4rem; font-weight: 900; letter-spacing: 4px;
-      background: linear-gradient(90deg, #00f5ff, #8a2be2, #ff0055, #00f5ff);
-      background-size: 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      animation: titleFlow 6s linear infinite;
+      font-size: 1.3rem; font-weight: 900; letter-spacing: 4px;
+      background: linear-gradient(90deg, #00f5ff, #8a2be2, #00f5ff); background-size: 200%;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: titleFlow 4s linear infinite;
     }
-    @keyframes titleFlow {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 300% 50%; }
-    }
-    #back-btn {
-      position: absolute; top: 50%; left: 15px; transform: translateY(-50%);
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
-      color: #fff; padding: 8px 16px; border-radius: 50px; font-size: 0.8rem; cursor: pointer;
-      transition: all 0.3s;
-    }
-    #back-btn:hover { background: rgba(255,255,255,0.15); border-color: #00f5ff; }
+    @keyframes titleFlow { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+    #back-btn { position: absolute; top: 18px; left: 15px; background: none; border: 1px solid #444; color: #aaa; padding: 6px 12px; border-radius: 50px; font-size: 0.8rem; cursor: pointer; }
 
-    /* The Main AR Hub */
-    #ar-hub {
-      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 20px; position: relative; z-index: 1;
-    }
-
-    /* Magical Portal Effect */
-    .portal {
-      position: relative; width: min(320px, 85vw); height: min(320px, 85vw);
-      display: flex; align-items: center; justify-content: center;
-    }
+    /* Preview Hub */
+    #ar-hub { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    
+    .portal { position: relative; width: min(300px, 80vw); height: min(300px, 80vw); display: flex; align-items: center; justify-content: center; }
     .portal-ring {
-      position: absolute; width: 100%; height: 100%; border-radius: 50%;
-      border: 2px solid transparent;
+      position: absolute; width: 110%; height: 110%; border-radius: 50%; border: 2px solid transparent;
       background: linear-gradient(var(--angle), #00f5ff, #8a2be2, #ff0055, #00f5ff) border-box;
       -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: destination-out;
-      mask-composite: exclude;
-      animation: rotatePortal 4s linear infinite;
-      filter: drop-shadow(0 0 15px rgba(0,245,255,0.5));
+      -webkit-mask-composite: destination-out; mask-composite: exclude;
+      animation: rotatePortal 4s linear infinite; filter: drop-shadow(0 0 10px rgba(0,245,255,0.4));
     }
     @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-    @keyframes rotatePortal {
-      from { --angle: 0deg; }
-      to { --angle: 360deg; }
-    }
+    @keyframes rotatePortal { from { --angle: 0deg; } to { --angle: 360deg; } }
 
-    model-viewer {
-      width: 100%; height: 100%;
-      --poster-color: transparent;
+    /* Custom Image Preview (3D Frame Effect) */
+    #custom-img-container {
+      display: none; position: relative; width: 80%; height: 80%; 
+      background: #000; border: 4px solid #00f5ff; border-radius: 10px;
+      overflow: hidden; box-shadow: 0 0 30px rgba(0,245,255,0.5);
       animation: hoverModel 4s ease-in-out infinite;
     }
-    @keyframes hoverModel {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-15px) scale(1.05); }
-    }
+    #custom-img-preview { width: 100%; height: 100%; object-fit: cover; filter: drop-shadow(0 0 10px #00f5ff); }
+    .glint { position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: glintMove 3s infinite; }
+    @keyframes glintMove { 0% { left: -100%; } 100% { left: 200%; } }
 
-    /* Character Controls Overlay */
+    model-viewer { width: 100%; height: 100%; animation: hoverModel 4s ease-in-out infinite; }
+    @keyframes hoverModel { 0%, 100% { transform: translateY(0) rotateY(0deg); } 50% { transform: translateY(-15px) rotateY(10deg); } }
+
+    /* Controls */
     .ar-btn {
-      position: relative; margin-top: 30px;
-      background: linear-gradient(135deg, #00f5ff, #8a2be2);
-      color: white; border: none; padding: 16px 40px; border-radius: 50px;
-      font-weight: 900; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 2px;
-      cursor: pointer; box-shadow: 0 10px 40px rgba(138,43,226,0.6);
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      margin-top: 30px; background: linear-gradient(135deg, #00f5ff, #8a2be2);
+      color: white; border: none; padding: 16px 36px; border-radius: 50px;
+      font-weight: 900; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px;
+      cursor: pointer; box-shadow: 0 10px 30px rgba(138,43,226,0.5); transition: 0.3s;
     }
-    .ar-btn:active { transform: scale(0.9); box-shadow: 0 5px 20px rgba(138,43,226,0.4); }
+    .ar-btn:active { transform: scale(0.9); }
 
-    /* Character Selection Bottom Panel */
-    #selector-panel {
-      background: rgba(10,10,24,0.95);
-      border-top: 1px solid rgba(0,245,255,0.2);
-      padding: 20px 0 40px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
-    }
-    #selector-panel h3 {
-      text-align: center; font-size: 0.8rem; color: #00f5ff;
-      text-transform: uppercase; letter-spacing: 4px; margin-bottom: 20px;
-      opacity: 0.8;
-    }
-    .scroll-grid {
-      display: flex; gap: 15px; overflow-x: auto; padding: 0 20px;
-      scrollbar-width: none; -ms-overflow-style: none;
-    }
+    /* Selector */
+    #selector { background: rgba(10,10,24,0.95); border-top: 1px solid rgba(0,245,255,0.2); padding: 20px 0 30px; backdrop-filter: blur(20px); }
+    #selector h3 { text-align: center; font-size: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 15px; }
+    .scroll-grid { display: flex; gap: 12px; overflow-x: auto; padding: 0 20px; scrollbar-width: none; }
     .scroll-grid::-webkit-scrollbar { display: none; }
 
-    .char-card {
-      flex: 0 0 85px; background: rgba(255,255,255,0.05);
-      border: 2px solid rgba(255,255,255,0.1); border-radius: 18px;
-      padding: 15px 5px; text-align: center; cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative; overflow: hidden;
+    .card {
+      flex: 0 0 85px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 18px; padding: 15px 5px; text-align: center; cursor: pointer; transition: 0.3s;
     }
-    .char-card::after {
-      content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
-      background: #00f5ff; transform: scaleX(0); transition: transform 0.3s;
-    }
-    .char-card.active {
-      background: rgba(0,245,255,0.1); border-color: #00f5ff;
-      transform: translateY(-8px) scale(1.05);
-      box-shadow: 0 8px 25px rgba(0,245,255,0.25);
-    }
-    .char-card.active::after { transform: scaleX(1); }
-    .char-card .emoji { font-size: 2.2rem; display: block; margin-bottom: 8px; filter: drop-shadow(0 0 8px rgba(255,255,255,0.3)); }
-    .char-card .name { font-size: 0.65rem; color: #aaa; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-    .char-card.active .name { color: #fff; }
+    .card.active { border-color: #00f5ff; background: rgba(0,245,255,0.1); transform: translateY(-5px); }
+    .card.upload-card { border-style: dashed; border-color: #8a2be2; background: rgba(138,43,226,0.05); }
+    .card.upload-card:hover { background: rgba(138,43,226,0.15); border-color: #00f5ff; }
+    .card .icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+    .card .label { font-size: 0.6rem; color: #888; font-weight: 800; text-transform: uppercase; }
 
-    /* Badge */
-    #status-badge {
-      background: rgba(0,245,255,0.15); border: 1px solid #00f5ff;
-      color: #00f5ff; padding: 6px 18px; border-radius: 50px;
-      font-size: 0.8rem; font-weight: 900; margin-top: 15px;
-      text-transform: uppercase; letter-spacing: 1px;
-    }
+    #hidden-upload { display: none; }
+
+    #status { margin-top: 15px; color: #00f5ff; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; background: rgba(0,245,255,0.1); padding: 5px 15px; border-radius: 50px; }
   </style>
 </head>
 <body>
@@ -151,108 +89,105 @@
   <div id="bg-canvas"></div>
 
   <header id="header">
-    <button id="back-btn" onclick="window.location.href='index.html'">EXIT</button>
+    <button id="back-btn" onclick="window.location.href='index.html'">← Back</button>
     <h1>TWIST LIVE AR</h1>
-    <p>TAP TO BRING CHARACTERS TO LIFE</p>
   </header>
 
   <main id="ar-hub">
     <div class="portal">
       <div class="portal-ring"></div>
-      <model-viewer id="main-model"
+      
+      <!-- 3D Model Viewer (for characters) -->
+      <model-viewer id="mv"
         src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
-        alt="AR Character"
-        shadow-intensity="2"
-        camera-controls
-        auto-rotate
-        autoplay
-        ar
-        ar-modes="webxr scene-viewer quick-look"
-        camera-orbit="0deg 75deg 105%"
-        field-of-view="30deg"
-        exposure="1.2"
-        environment-image="neutral">
-        <button slot="ar-button" id="main-ar-btn" class="ar-btn">⚡ LAUNCH INTO REALITY</button>
+        alt="AR Soul" ar ar-modes="webxr scene-viewer quick-look"
+        camera-controls auto-rotate autoplay shadow-intensity="1" exposure="1.2">
+        <button slot="ar-button" class="ar-btn">🔥 BRING TO LIFE</button>
       </model-viewer>
+
+      <!-- 2D to 3D Image Viewer -->
+      <div id="custom-img-container">
+        <img id="custom-img-preview" src="" alt="Custom soul">
+        <div class="glint"></div>
+        <div style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); width:100%; text-align:center; font-size:10px; color:#00f5ff; font-weight:900;">LIVING HOLOGRAM</div>
+      </div>
     </div>
 
-    <div id="status-badge">🧑‍🚀 ASTRONAUT READY</div>
+    <div id="status">🧑‍🚀 Character soul selected</div>
+    <button id="custom-ar-btn" class="ar-btn" style="display:none;" onclick="alert('To place 2D images in 3D space, we are converting this to a spatial object! Point your camera and tap!')">⚡ LAUNCH HOLOGRAM</button>
   </main>
 
-  <section id="selector-panel">
-    <h3>SELECT SOUL</h3>
-    <div class="scroll-grid" id="char-grid">
-      <!-- Astronaut -->
-      <div class="char-card active" onclick="loadChar(this, 'Astronaut', 'https://modelviewer.dev/shared-assets/models/Astronaut.glb', '🧑‍🚀', 'Idle', 'neutral')">
-        <span class="emoji">🧑‍🚀</span>
-        <span class="name">Astronaut</span>
+  <section id="selector">
+    <h3>SELECT SOUL TO AWAKEN</h3>
+    <div class="scroll-grid">
+      <!-- Upload Button -->
+      <div class="card upload-card" onclick="document.getElementById('hidden-upload').click()">
+        <span class="icon">📸</span>
+        <span class="label">Upload My Own</span>
       </div>
-      <!-- Power Robot -->
-      <div class="char-card" onclick="loadChar(this, 'Robot', 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', '🤖', 'Dance', 'neutral')">
-        <span class="emoji">🤖</span>
-        <span class="name">Robot</span>
+      <input type="file" id="hidden-upload" accept="image/*" onchange="handleUpload(this)">
+
+      <!-- Characters -->
+      <div class="card active" onclick="selectChar(this, 'Astronaut', 'https://modelviewer.dev/shared-assets/models/Astronaut.glb', '🧑‍🚀')">
+        <span class="icon">🧑‍🚀</span>
+        <span class="label">Astronaut</span>
       </div>
-      <!-- Magic Fox -->
-      <div class="char-card" onclick="loadChar(this, 'Fox', 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb', '🦊', 'Survey', 'neutral')">
-        <span class="emoji">🦊</span>
-        <span class="name">Fox</span>
+      <div class="card" onclick="selectChar(this, 'Robot', 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', '🤖')">
+        <span class="icon">🤖</span>
+        <span class="label">Robot</span>
       </div>
-      <!-- Flower Pot (Vase) -->
-      <div class="char-card" onclick="loadChar(this, 'Flower', 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb', '🪴', '', 'neutral')">
-        <span class="emoji">🪑</span>
-        <span class="name">Velvet</span>
-      </div>
-      <!-- Lucky Duck -->
-      <div class="char-card" onclick="loadChar(this, 'Duck', 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', '🦆', '', 'neutral')">
-        <span class="emoji">🦆</span>
-        <span class="name">Duck</span>
-      </div>
-       <!-- Secret Pilot -->
-       <div class="char-card" onclick="loadChar(this, 'Pilot', 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/FlightHelmet/glTF/FlightHelmet.gltf', '🪖', '', 'neutral')">
-        <span class="emoji">🪖</span>
-        <span class="name">Pilot</span>
+      <div class="card" onclick="selectChar(this, 'Fox', 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb', '🦊')">
+        <span class="icon">🦊</span>
+        <span class="label">Fox</span>
       </div>
     </div>
   </section>
 
   <script>
-    // Create stars for background
-    const bg = document.getElementById('bg-canvas');
-    for(let i=0; i<80; i++) {
-      const star = document.createElement('div');
-      star.className = 'stars';
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.setProperty('--speed', (2 + Math.random() * 5) + 's');
-      bg.appendChild(star);
+    // Star BG
+    for(let i=0; i<60; i++){
+      let s = document.createElement('div');
+      s.className = 'stars';
+      s.style.left = Math.random()*100+'%'; s.style.top = Math.random()*100+'%';
+      s.style.setProperty('--speed', (2+Math.random()*4)+'s');
+      document.getElementById('bg-canvas').appendChild(s);
     }
 
-    function loadChar(el, name, src, emoji, anim, env) {
-      // Audio feedback (if possible)
-      if (window.navigator.vibrate) window.navigator.vibrate(10);
+    const mv = document.getElementById('mv');
+    const customContainer = document.getElementById('custom-img-container');
+    const customPreview = document.getElementById('custom-img-preview');
+    const status = document.getElementById('status');
+    const customArBtn = document.getElementById('custom-ar-btn');
 
-      // UI Update
-      document.querySelectorAll('.char-card').forEach(c => c.classList.remove('active'));
+    function selectChar(el, name, src, icon) {
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
       el.classList.add('active');
-
-      const mv = document.getElementById('main-model');
-      const badge = document.getElementById('status-badge');
-      const btn = document.getElementById('main-ar-btn');
-
-      badge.innerText = `${emoji} ${name.toUpperCase()} READY`;
-      badge.style.opacity = '0';
-      setTimeout(() => badge.style.opacity = '1', 50);
-
-      btn.innerText = `⚡ PLACE ${name.toUpperCase()} HERE`;
-
-      // Update Model
+      
+      mv.style.display = 'block';
+      customContainer.style.display = 'none';
+      customArBtn.style.display = 'none';
+      
       mv.src = src;
-      if (anim) {
-        mv.animationName = anim;
-      } else {
-        mv.removeAttribute('animation-name');
+      status.innerText = icon + " " + name + " soul selected";
+    }
+
+    function handleUpload(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          // Switch to custom mode
+          document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+          input.parentElement.classList.add('active');
+          
+          mv.style.display = 'none';
+          customContainer.style.display = 'block';
+          customArBtn.style.display = 'block';
+          
+          customPreview.src = e.target.result;
+          status.innerText = "✨ CUSTOM PHOTO SOUL READY";
+        }
+        reader.readAsDataURL(input.files[0]);
       }
-      mv.environmentImage = env;
     }
   </script>
 </body>
