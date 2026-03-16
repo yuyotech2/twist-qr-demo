@@ -1,116 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TwistQR | The 2026 Artist Drop</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TwistQR | The Future of Interactive Art</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;900&display=swap" rel="stylesheet">
+  <meta name="description" content="TwistQR brings your brand to life with professional Augmented Reality experiences.">
 </head>
 <body>
-    <div id="update-banner">TWIST AR ENGINE V5.0 - DEDICATED CAMERA PAGE</div>
+  <div class="bg-mesh"></div>
 
-    <div class="container">
-        <header>
-            <div class="logo">TWIST<span>QR</span></div>
-            <nav style="display: flex; align-items: center; gap: 1.5rem;">
-                <div id="system-clock" style="font-family: monospace; color: var(--accent-secondary); font-size: 0.9rem; background: rgba(0, 245, 255, 0.1); padding: 0.4rem 0.8rem; border-radius: 6px; border: 1px solid rgba(0, 245, 255, 0.2);">11:23:15</div>
-                <a href="#features" class="btn btn-outline" style="border: none;">Features</a>
-                <a href="dashboard.html" class="btn btn-primary">Artist Portal</a>
-            </nav>
-        </header>
+  <div class="container">
+    <nav>
+      <div class="logo">TWISTQR</div>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+      </ul>
+    </nav>
 
-        <section class="hero">
-            <h1 class="floating">The <span class="gradient-text">2026 Twist</span> for Local Artists.</h1>
-            <p>Beyond the menu. Beyond the barcode. Turn every sticker and tag into a portal for AR experiences, hidden content, and interactive drops.</p>
-            <div class="hero-cta">
-                <a href="#demo" class="btn btn-primary">See the 2026 Drop</a>
-                <a href="#pricing" class="btn btn-outline" style="margin-left: 1rem;">View Monetization</a>
-            </div>
-        </section>
+    <section class="hero">
+      <h1>Bring Your Art <br> <span style="color: #00f5ff;">To Life</span></h1>
+      <p>Transform any sticker, product, or physical item into a magical 3D interactive experience with professional Augmented Reality.</p>
+      <a href="ar.html" class="btn-primary">LAUNCH AR EXPERIENCE</a>
+    </section>
 
-        <section id="demo" style="padding: 4rem 0;">
-            <div style="display: flex; justify-content: center; align-items: center; gap: 4rem; flex-wrap: wrap;">
-                <div class="glass-card" style="max-width: 400px; display: flex; flex-direction: column; align-items: center; border-color: var(--accent-secondary);">
-                    <h3 style="color: var(--accent-secondary);">The AR Trigger Card</h3>
-                    <p style="margin: 1rem 0; font-size: 0.9rem; text-align: center;"><b>HOW TO USE:</b> Tap the image below. It will activate your phone's camera. Then point it back at this screen to see the Twist!</p>
-                    
-                    <div id="sticker-mockup" style="width: 250px; height: 250px; background: white; border-radius: 20px; border: 8px solid var(--accent-secondary); display: flex; align-items: center; justify-content: center; position: relative; margin-top: 1rem; cursor: pointer; box-shadow: 0 0 40px rgba(0, 245, 255, 0.4);" onclick="window.location.href='ar.html'">
-                        <img src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.2/examples/image-tracking/assets/card-example/card.png" style="width: 90%; border-radius: 10px;">
-                        <div style="position: absolute; top: 40%; background: #ff0055; color: white; padding: 15px 30px; border-radius: 8px; font-weight: 800; font-size: 1.2rem; transform: scale(1); animation: pulse 2s infinite; text-align: center;">TAP HERE<br><span style="font-size: 0.8rem;">TO START CAMERA</span></div>
-                    </div>
-                </div>
-                
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-                    <!-- Manual Controls -->
-                    <div class="glass-card" style="padding: 0.5rem; border-radius: 50px; display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                        <button class="btn btn-outline" style="padding: 0.5rem 1.5rem; font-size: 0.8rem; border-radius: 40px;" onclick="manualLoad('ar')">AR Filter</button>
-                        <button class="btn btn-outline" style="padding: 0.5rem 1.5rem; font-size: 0.8rem; border-radius: 40px;" onclick="manualLoad('video')">Video</button>
-                        <button class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.8rem; border-radius: 40px;" onclick="manualLoad('game')">Play Game</button>
-                    </div>
+    <section id="features" class="features">
+      <div class="feature-card">
+        <div class="icon-box">✨</div>
+        <h3>Auto-Animated</h3>
+        <p>Every 3D soul comes pre-programmed with interactive movements and expressions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon-box">🚀</div>
+        <h3>Instant Launch</h3>
+        <p>No app install required. Works directly in your browser with record-breaking speed.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon-box">🎨</div>
+        <h3>Brand Integration</h3>
+        <p>Customize every character to match your brand's unique style and personality.</p>
+      </div>
+    </section>
 
-                    <div class="mobile-frame">
-                        <div class="mobile-content" id="mobile-viewport">
-                            <!-- Content will be injected by main.js -->
-                            <div style="padding: 2rem; text-align: center;">
-                                <p style="margin-top: 50%;">Scanning...</p>
-                            </div>
-                        </div>
-                        <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 100px; height: 4px; background: #333; border-radius: 2px;"></div>
-                    </div>
-                    <p style="font-size: 0.8rem; color: #666; margin-top: 1rem;">Try clicking the <b>Play Game</b> button above to test it!</p>
-                </div>
-            </div>
-        </section>
+    <footer>
+      &copy; 2026 TWISTQR · POWERED BY ADVANCED AR ENGINE
+    </footer>
+  </div>
 
-        <section id="features" class="features">
-            <div class="glass-card">
-                <span class="feature-icon">✨</span>
-                <h3>Hidden AR Filters</h3>
-                <p>Unlock custom Face or World AR filters that let fans step into your aesthetic. No app download required.</p>
-            </div>
-            <div class="glass-card">
-                <span class="feature-icon">🎬</span>
-                <h3>Behind-the-Scenes</h3>
-                <p>Private video drops. Show the process, the studio, or a "Thank You" message meant only for those who bought the physical piece.</p>
-            </div>
-            <div class="glass-card">
-                <span class="feature-icon">🎮</span>
-                <h3>Mini-Games</h3>
-                <p>Interactive playground. Simple, addictive games that reward high scores with discounts or early access.</p>
-            </div>
-        </section>
-
-        <section id="pricing" style="padding: 4rem 0; text-align: center;">
-            <h2 style="font-size: 3rem; margin-bottom: 2rem;">Built for <span class="gradient-text">Creator Sustainability</span>.</h2>
-            <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
-                <div class="glass-card" style="flex: 1; min-width: 300px; border-color: var(--accent-primary);">
-                    <h4 style="color: var(--accent-primary); letter-spacing: 2px;">THE STARTER</h4>
-                    <div style="font-size: 3rem; margin: 1rem 0;">$49<span style="font-size: 1rem; color: var(--text-muted);">/one-time</span></div>
-                    <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 2rem;">
-                        <li>✓ 50 Custom Stickers/Tags</li>
-                        <li>✓ 1 Active Drop (Video or AR)</li>
-                        <li>✓ Pay-per-scan ($0.05)</li>
-                    </ul>
-                    <button class="btn btn-primary" style="width: 100%;">Get Started</button>
-                </div>
-                <div class="glass-card" style="flex: 1; min-width: 300px;">
-                    <h4 style="color: var(--accent-secondary); letter-spacing: 2px;">THE ESTABLISHED</h4>
-                    <div style="font-size: 3rem; margin: 1rem 0;">$29<span style="font-size: 1rem; color: var(--text-muted);">/mo-hosting</span></div>
-                    <ul style="list-style: none; padding: 0; text-align: left; margin-bottom: 2rem;">
-                        <li>✓ Unlimited Scans</li>
-                        <li>✓ Interactive Mini-Games</li>
-                        <li>✓ Custom Domain Portal</li>
-                    </ul>
-                    <button class="btn btn-outline" style="width: 100%;">Upgrade</button>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <script src="main.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
