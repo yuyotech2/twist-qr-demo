@@ -2,15 +2,13 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>TwistQR | AR Design Studio Supreme</title>
+  <title>TwistQR | AR Design Supreme 3D</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     :root {
       --primary: #00f5ff;
       --secondary: #8a2be2;
       --work-accent: #4caf50;
-      --nature-accent: #8bc34a;
-      --food-accent: #ff9800;
       --danger: #ff4444;
       --bg: #050508;
     }
@@ -42,7 +40,7 @@
     #selector-strip { background: rgba(0,0,0,0.6); padding: 25px 0 45px; border-top: 1px solid rgba(255,255,255,0.05); }
     .scroller { display: flex; gap: 15px; overflow-x: auto; padding: 0 20px; }
     .scroller::-webkit-scrollbar { display: none; }
-    .char-card { flex: 0 0 95px; height: 110px; background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.1); border-radius: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .char-card { flex: 0 0 95px; height: 110px; background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.1); border-radius: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
     .char-card.active.play { border-color: var(--primary); background: rgba(0,245,255,0.1); }
     .char-card.active.work { border-color: var(--work-accent); background: rgba(76,175,80,0.1); }
     .char-card .icon { font-size: 2rem; }
@@ -51,17 +49,16 @@
     #ar-canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
     
     .ar-object { 
-      position: absolute; width: 140px; pointer-events: auto; touch-action: none; 
+      position: absolute; width: 160px; height: 160px; pointer-events: auto; touch-action: none; 
       filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
       display: flex; align-items: center; justify-content: center;
       transition: transform 0.1s;
-      animation: spawn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), breathe 4s ease-in-out infinite;
+      animation: spawn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    @keyframes spawn { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 100% { transform: scale(var(--sc, 1)) rotate(var(--rot, 0deg)); opacity: 1; } }
-    @keyframes breathe { 0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)) scale(var(--sc, 1)); } 50% { transform: translateY(-12px) rotate(var(--rot, 0deg)) scale(var(--sc, 1)); } }
+    @keyframes spawn { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
     
     .ar-object.selected { border: 2px solid var(--primary); border-radius: 15px; background: rgba(0, 245, 255, 0.1); padding: 10px; z-index: 2000 !important; }
-    .delete-btn { position: absolute; top: -15px; right: -15px; background: var(--danger); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: 900; font-size: 16px; display: none; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
+    .delete-btn { position: absolute; top: -15px; right: -15px; background: var(--danger); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: 900; font-size: 16px; display: none; box-shadow: 0 0 10px rgba(255,0,0,0.5); z-index: 2010; }
     .ar-object.selected .delete-btn { display: block; }
 
     /* Precision Sidebar */
@@ -82,7 +79,7 @@
     .catalog-section:last-child { border-right: none; }
     .section-label { writing-mode: vertical-lr; font-size: 0.45rem; color: #555; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
 
-    .cam-item { flex: 0 0 70px; height: 70px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.8rem; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+    .cam-item { flex: 0 0 70px; height: 70px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.8rem; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; position: relative; }
     .cam-item:active { transform: scale(0.9); }
     .cam-label { font-size: 0.4rem; text-transform: uppercase; font-weight: 900; margin-top: 3px; color: #666; letter-spacing: 1px; }
 
@@ -92,6 +89,7 @@
     #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; opacity: 0; pointer-events: none; }
     #status-msg { position: absolute; top: 80px; width: 100%; text-align: center; color: var(--primary); font-weight: 900; letter-spacing: 3px; text-shadow: 0 2px 15px black; pointer-events: none; }
     
+    /* Tutorial Overlay */
     #tut { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; cursor: pointer; }
     #tut h2 { color: var(--primary); font-size: 2.22rem; margin-bottom: 15px; }
     #tut p { color: #888; line-height: 1.6; }
@@ -102,15 +100,15 @@
   <div id="flash"></div>
 
   <div id="tut" onclick="this.style.opacity='0'; setTimeout(()=>this.style.display='none', 500)">
-    <h2>SUPREME DESIGNER</h2>
-    <p>Tap items to add.<br>Drag to position.<br>Slide on the right to scale & rotate.<br>Tap any item to select it.</p>
+    <h2>Everything 3D</h2>
+    <p>Tap items to add real 3D models.<br>Drag to position.<br>Slide to size.<br>Tap any item to select it.</p>
     <button class="btn-launch" style="margin-top:40px;">ENTER HUB</button>
   </div>
 
   <div id="main-menu">
     <header id="header">
       <button onclick="window.location.href='index.html'" style="position:absolute; left:18px; top:12px; background:none; border:none; color:#444; font-size:1.5rem;">✕</button>
-      <h1>TWIST DESIGN SUPREME</h1>
+      <h1>TWIST DESIGN SUPREME 3D</h1>
       <div class="mode-toggle">
         <button id="mode-play" class="mode-btn active play" onclick="setMode('play')">SOULS</button>
         <button id="mode-work" class="mode-btn" onclick="setMode('work')">WORK</button>
@@ -130,88 +128,34 @@
   <div id="ar-camera-view">
     <video id="v-feed" autoplay playsinline></video>
     <div id="ar-canvas-layer"></div>
-    <div id="status-msg">SUPREME MODE: ACTIVE</div>
+    <div id="status-msg">3D MULTI-OBJECT ACTIVE</div>
 
+    <!-- TRANSFORM CONTROLS -->
     <div id="sidebar-controls">
       <div class="control-group">
         <span class="control-label">SIZE</span>
-        <input type="range" id="size-slider" min="0.3" max="5" step="0.1" value="1" oninput="updateItem()">
-      </div>
-      <div class="control-group">
-        <span class="control-label">ROT</span>
-        <input type="range" id="rot-slider" min="0" max="360" step="5" value="0" oninput="updateItem()">
+        <input type="range" id="size-slider" min="0.5" max="3" step="0.1" value="1" oninput="updateItem()">
       </div>
     </div>
 
-    <!-- SUPREME MASSIVE CATALOG -->
+    <!-- SUPREME 3D CATALOG -->
     <div id="in-cam-selector">
         
         <!-- SOULS SECTION -->
         <div class="catalog-section">
           <span class="section-label">Souls</span>
-          <div class="cam-item" onclick="addItem('🧑‍🚀', 'ASTRO')"><span>🧑‍🚀</span><span class="cam-label">Astro</span></div>
-          <div class="cam-item" onclick="addItem('🤖', 'ROBOT')"><span>🤖</span><span class="cam-label">Robot</span></div>
-          <div class="cam-item" onclick="addItem('🐉', 'DRAGON')"><span>🐉</span><span class="cam-label">Dragon</span></div>
-          <div class="cam-item" onclick="addItem('👻', 'GHOST')"><span>👻</span><span class="cam-label">Ghost</span></div>
-          <div class="cam-item" onclick="addItem('👽', 'ALIEN')"><span>👽</span><span class="cam-label">Alien</span></div>
-          <div class="cam-item" onclick="addItem('🦁', 'LION')"><span>🦁</span><span class="cam-label">Lion</span></div>
-          <div class="cam-item" onclick="addItem('🦄', 'UNICORN')"><span>🦄</span><span class="cam-label">Unicorn</span></div>
-          <div class="cam-item" onclick="addItem('🐱', 'CAT')"><span>🐱</span><span class="cam-label">Cat</span></div>
-          <div class="cam-item" onclick="addItem('🐶', 'DOG')"><span>🐶</span><span class="cam-label">Dog</span></div>
+          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/Astronaut.glb')"><span>🧑‍🚀</span><span class="cam-label">Astro</span></div>
+          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb')"><span>🤖</span><span class="cam-label">Robot</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb')"><span>🦊</span><span class="cam-label">Fox</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb')"><span>🦆</span><span class="cam-label">Duck</span></div>
         </div>
 
-        <!-- FURNITURE SECTION (EXPANDED) -->
+        <!-- FURNITURE 3D SECTION -->
         <div class="catalog-section">
           <span class="section-label">Home</span>
-          <div class="cam-item" onclick="addItem('🛋️', 'COUCH')"><span>🛋️</span><span class="cam-label">Couch</span></div>
-          <div class="cam-item" onclick="addItem('🛏️', 'BED')"><span>🛏️</span><span class="cam-label">Bed</span></div>
-          <div class="cam-item" onclick="addItem('🪑', 'CHAIR')"><span>🪑</span><span class="cam-label">Chair</span></div>
-          <div class="cam-item" onclick="addItem('🖥️', 'DESK')"><span>🖥️</span><span class="cam-label">Desk</span></div>
-          <div class="cam-item" onclick="addItem('📚', 'SHELF')"><span>📚</span><span class="cam-label">Shelf</span></div>
-          <div class="cam-item" onclick="addItem('👗', 'WARDROBE')"><span>👗</span><span class="cam-label">Closet</span></div>
-          <div class="cam-item" onclick="addItem('🪞', 'MIRROR')"><span>🪞</span><span class="cam-label">Mirror</span></div>
-          <div class="cam-item" onclick="addItem('📺', 'TV')"><span>📺</span><span class="cam-label">TV</span></div>
-          <div class="cam-item" onclick="addItem('🍽️', 'TABLE')"><span>🍽️</span><span class="cam-label">Table</span></div>
-          <div class="cam-item" onclick="addItem('💡', 'LAMP')"><span>💡</span><span class="cam-label">Lamp</span></div>
-          <div class="cam-item" onclick="addItem('🧶', 'RUG')"><span>🧶</span><span class="cam-label">Rug</span></div>
-          <div class="cam-item" onclick="addItem('🧺', 'WASH')"><span>🧺</span><span class="cam-label">Wash</span></div>
-          <div class="cam-item" onclick="addItem('🛁', 'BATH')"><span>🛁</span><span class="cam-label">Bath</span></div>
-          <div class="cam-item" onclick="addItem('🚽', 'TOILET')"><span>🚽</span><span class="cam-label">Toilet</span></div>
-          <div class="cam-item" onclick="addItem('❄️', 'FRIDGE')"><span>❄️</span><span class="cam-label">Fridge</span></div>
-          <div class="cam-item" onclick="addItem('🍳', 'OVEN')"><span>🍳</span><span class="cam-label">Oven</span></div>
-          <div class="cam-item" onclick="addItem('🍼', 'CRIB')"><span>🍼</span><span class="cam-label">Crib</span></div>
-          <div class="cam-item" onclick="addItem('🎹', 'PIANO')"><span>🎹</span><span class="cam-label">Piano</span></div>
-          <div class="cam-item" onclick="addItem('🎸', 'GUITAR')"><span>🎸</span><span class="cam-label">Guitar</span></div>
-          <div class="cam-item" onclick="addItem('🚪', 'DOOR')"><span>🚪</span><span class="cam-label">Door</span></div>
-          <div class="cam-item" onclick="addItem('🪟', 'WINDOW')"><span>🪟</span><span class="cam-label">Window</span></div>
-        </div>
-
-        <!-- NATURE & LIFE SECTION -->
-        <div class="catalog-section">
-          <span class="section-label">Life</span>
-          <div class="cam-item" onclick="addItem('🌲', 'TREE')"><span>🌲</span><span class="cam-label">Tree</span></div>
-          <div class="cam-item" onclick="addItem('🌵', 'CACTUS')"><span>🌵</span><span class="cam-label">Cactus</span></div>
-          <div class="cam-item" onclick="addItem('🌻', 'FLOWER')"><span>🌻</span><span class="cam-label">Flower</span></div>
-          <div class="cam-item" onclick="addItem('🍄', 'MUSHROOM')"><span>🍄</span><span class="cam-label">Mushy</span></div>
-          <div class="cam-item" onclick="addItem('🍕', 'PIZZA')"><span>🍕</span><span class="cam-label">Pizza</span></div>
-          <div class="cam-item" onclick="addItem('🍦', 'ICE CREAM')"><span>🍦</span><span class="cam-label">Cream</span></div>
-          <div class="cam-item" onclick="addItem('🍩', 'DONUT')"><span>🍩</span><span class="cam-label">Donut</span></div>
-          <div class="cam-item" onclick="addItem('🍔', 'BURGER')"><span>🍔</span><span class="cam-label">Burger</span></div>
-          <div class="cam-item" onclick="addItem('🍭', 'CANDY')"><span>🍭</span><span class="cam-label">Candy</span></div>
-          <div class="cam-item" onclick="addItem('🍿', 'POP')"><span>🍿</span><span class="cam-label">Corn</span></div>
-        </div>
-
-        <!-- SPACE & EXTRA SECTION -->
-        <div class="catalog-section">
-          <span class="section-label">Extra</span>
-          <div class="cam-item" onclick="addItem('🪐', 'PLANET')"><span>🪐</span><span class="cam-label">Planet</span></div>
-          <div class="cam-item" onclick="addItem('🚀', 'ROCKET')"><span>🚀</span><span class="cam-label">Rocket</span></div>
-          <div class="cam-item" onclick="addItem('🛸', 'UFO')"><span>🛸</span><span class="cam-label">UFO</span></div>
-          <div class="cam-item" onclick="addItem('💎', 'GEM')"><span>💎</span><span class="cam-label">Gem</span></div>
-          <div class="cam-item" onclick="addItem('💰', 'MONEY')"><span>💰</span><span class="cam-label">Cash</span></div>
-          <div class="cam-item" onclick="addItem('🔥', 'FIRE')"><span>🔥</span><span class="cam-label">Fire</span></div>
-          <div class="cam-item" onclick="addItem('👑', 'CROWN')"><span>👑</span><span class="cam-label">Crown</span></div>
-          <div class="cam-item" onclick="addItem('🧸', 'TOY')"><span>🧸</span><span class="cam-label">Toy</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb')"><span>🛋️</span><span class="cam-label">Couch</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb')"><span>🪑</span><span class="cam-label">Chair</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb')"><span>📦</span><span class="cam-label">Box</span></div>
           <div class="cam-item" onclick="document.getElementById('file-in').click()"><span>🖼️</span><span class="cam-label">Upload</span></div>
         </div>
 
@@ -231,11 +175,24 @@
     const canvas = document.getElementById('ar-canvas-layer');
     const vFeed = document.getElementById('v-feed');
     const sizeS = document.getElementById('size-slider');
-    const rotS = document.getElementById('rot-slider');
     const flash = document.getElementById('flash');
     
     let currentMode = 'play';
     let selectedItem = null;
+
+    const catalog = {
+      play: [
+        { name: 'Astro', icon: '🧑‍🚀', src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb' },
+        { name: 'Robot', icon: '🤖', src: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb' },
+        { name: 'Fox', icon: '🦊', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb' },
+        { name: 'Duck', icon: '🦆', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb' }
+      ],
+      work: [
+        { name: 'Couch', icon: '🛋️', src: 'https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb' },
+        { name: 'Chair', icon: '🪑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb' },
+        { name: 'Box', icon: '📦', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb' }
+      ]
+    };
 
     function setMode(mode) {
         currentMode = mode;
@@ -247,18 +204,18 @@
     function renderScroller() {
         const scroller = document.getElementById('scroller');
         scroller.innerHTML = '';
-        const items = currentMode === 'play' ? ['🧑‍🚀','🤖','🐲','👻','🦁','🦄','🐱','🐶','👽'] : ['🛋️','🛏️','🪑','🖥️','📚','👗','🪞','📺','🍽️','💡','🧶','🧺','🛁','🚽','❄️','🍳','🍼','🎹','🎸','🚪','🪟'];
-        items.forEach(icon => {
+        catalog[currentMode].forEach(item => {
             let card = document.createElement('div');
             card.className = 'char-card';
-            card.innerHTML = `<span class="icon">${icon}</span>`;
+            card.innerHTML = `<span class="icon">${item.icon}</span>`;
             card.onclick = () => {
                 document.querySelectorAll('.char-card').forEach(c => c.classList.remove('active', 'play', 'work'));
                 card.classList.add('active', currentMode);
+                document.getElementById('main-view').src = item.src;
             };
             scroller.appendChild(card);
         });
-        scroller.firstChild.click();
+        if(scroller.firstChild) scroller.firstChild.click();
     }
 
     async function enterAR() {
@@ -267,7 +224,7 @@
         try {
           const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
           vFeed.srcObject = s;
-          addItem(currentMode === 'play' ? '🧑‍🚀' : '🛋️');
+          addItem(catalog[currentMode][0].src);
         } catch(e) { exitAR(); }
     }
 
@@ -278,16 +235,22 @@
         clearAll();
     }
 
-    function addItem(iconOrSrc) {
+    function addItem(src) {
         const obj = document.createElement('div');
         obj.className = 'ar-object';
         obj.style.left = '50%';
         obj.style.top = '40%';
-        obj.dataset.sc = "1";
-        obj.dataset.rot = "0";
         
-        const inner = iconOrSrc.startsWith('data:image') ? `<img src="${iconOrSrc}" style="width:100%; border-radius:15px;">` : `<div style="font-size: 5rem;">${iconOrSrc}</div>`;
-        obj.innerHTML = inner + `<button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
+        let mv = document.createElement('model-viewer');
+        mv.src = src;
+        mv.style.width = '100%';
+        mv.style.height = '100%';
+        mv.setAttribute('auto-rotate', '');
+        mv.setAttribute('shadow-intensity', '1');
+        mv.setAttribute('camera-controls', '');
+        
+        obj.appendChild(mv);
+        obj.innerHTML += `<button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
 
         canvas.appendChild(obj);
         makeDraggable(obj);
@@ -298,16 +261,14 @@
         selectedItem = el;
         document.querySelectorAll('.ar-object').forEach(o => o.classList.remove('selected'));
         el.classList.add('selected');
-        sizeS.value = el.dataset.sc;
-        rotS.value = el.dataset.rot;
+        // We use the scale of the outer div for simplicity here
+        const currentScale = el.style.transform.match(/scale\((.*?)\)/);
+        sizeS.value = currentScale ? currentScale[1] : 1;
     }
 
     function updateItem() {
         if (!selectedItem) return;
-        selectedItem.dataset.sc = sizeS.value;
-        selectedItem.dataset.rot = rotS.value;
-        selectedItem.style.setProperty('--sc', sizeS.value);
-        selectedItem.style.setProperty('--rot', rotS.value + 'deg');
+        selectedItem.style.transform = `scale(${sizeS.value})`;
     }
 
     function saveDesign() {
@@ -321,19 +282,31 @@
     function uploadToAR(input) {
         if (input.files[0]) {
             const reader = new FileReader();
-            reader.onload = e => addItem(e.target.result);
+            reader.onload = e => {
+              // Custom photos are still 2D sprites in the 3D world
+              const obj = document.createElement('div');
+              obj.className = 'ar-object';
+              obj.style.left = '50%'; obj.style.top = '40%';
+              obj.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:15px;"><button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
+              canvas.appendChild(obj);
+              makeDraggable(obj);
+              selectObject(obj);
+            }
             reader.readAsDataURL(input.files[0]);
         }
     }
 
     function makeDraggable(el) {
         let dragging = false;
-        el.addEventListener('touchstart', (e) => { dragging = true; selectObject(el); });
+        el.addEventListener('touchstart', (e) => { 
+          if(e.target.tagName === 'BUTTON') return;
+          dragging = true; selectObject(el); 
+        });
         window.addEventListener('touchmove', (e) => {
             if (!dragging) return;
             const t = e.touches[0];
-            el.style.left = (t.clientX - 70) + 'px';
-            el.style.top = (t.clientY - 70) + 'px';
+            el.style.left = (t.clientX - 80) + 'px';
+            el.style.top = (t.clientY - 80) + 'px';
         });
         window.addEventListener('touchend', () => { dragging = false; });
     }
