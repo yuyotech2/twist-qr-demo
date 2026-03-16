@@ -6,54 +6,159 @@
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; font-family: sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 20px; }
-    #banner { position: fixed; top: 0; left: 0; width: 100%; background: #ff0055; color: white; text-align: center; font-weight: bold; padding: 8px; z-index: 9999; font-size: 0.85rem; }
-    h2 { font-size: 1.8rem; margin-bottom: 10px; color: #00f5ff; text-align: center; }
-    p { color: #aaa; text-align: center; margin-bottom: 30px; font-size: 0.95rem; max-width: 320px; }
+    body { background: #050505; font-family: 'Segoe UI', sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Header */
+    #header {
+      background: linear-gradient(135deg, #0d0d0d, #1a1a2e);
+      padding: 12px 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(138,43,226,0.3);
+    }
+    #header h1 { font-size: 1.2rem; color: #00f5ff; letter-spacing: 2px; }
+    #header p { font-size: 0.75rem; color: #888; margin-top: 2px; }
+    #back-btn { position: absolute; top: 12px; left: 15px; background: none; border: 1px solid #555; color: #aaa; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; }
+
+    /* Viewer */
+    #viewer-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: radial-gradient(circle at center, rgba(138,43,226,0.1) 0%, transparent 70%);
+    }
     model-viewer {
-      width: 320px;
-      height: 320px;
-      border-radius: 20px;
-      border: 3px solid #8a2be2;
-      box-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+      width: min(340px, 90vw);
+      height: min(340px, 40vh);
       --progress-bar-color: #00f5ff;
+      --progress-bar-height: 3px;
     }
-    .ar-button {
-      background: #8a2be2 !important;
-      color: white !important;
-      border: none !important;
-      padding: 14px 30px !important;
-      border-radius: 50px !important;
-      font-weight: bold !important;
-      font-size: 1rem !important;
-      margin-top: 20px !important;
+
+    /* AR Button */
+    model-viewer .ar-btn {
+      background: linear-gradient(135deg, #8a2be2, #00f5ff);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(138,43,226,0.4);
+      display: block;
+      margin: 0 auto 10px;
     }
-    #exit { margin-top: 20px; background: transparent; border: 1px solid #555; color: #aaa; padding: 12px 30px; border-radius: 50px; font-size: 0.9rem; cursor: pointer; }
+
+    /* Model Selector */
+    #selector {
+      background: rgba(15,15,25,0.95);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 15px 10px 25px;
+    }
+    #selector h3 { text-align: center; font-size: 0.75rem; color: #888; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+    #model-grid {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 5px 5px 10px;
+      scrollbar-width: none;
+    }
+    #model-grid::-webkit-scrollbar { display: none; }
+    .model-card {
+      flex-shrink: 0;
+      width: 80px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 10px 5px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .model-card:hover, .model-card.active {
+      border-color: #8a2be2;
+      background: rgba(138,43,226,0.15);
+      transform: translateY(-3px);
+    }
+    .model-card .emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
+    .model-card .label { font-size: 0.65rem; color: #aaa; font-weight: 600; }
+    .model-card.active .label { color: #00f5ff; }
+
+    /* Info bar */
+    #info { text-align: center; padding: 10px; font-size: 0.75rem; color: #666; }
   </style>
 </head>
 <body>
-  <div id="banner">TWISTQR - LIVE WORLD AR</div>
-  
-  <h2>🌀 Twist AR</h2>
-  <p>Preview the 3D character below, then tap <b>"View in your space"</b> to place it anywhere in your real world!</p>
 
-  <model-viewer
-    src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
-    alt="TwistQR Character"
-    ar
-    ar-modes="webxr scene-viewer quick-look"
-    camera-controls
-    auto-rotate
-    shadow-intensity="1"
-    ar-button-class="ar-button"
-    style="--ar-button-background: #8a2be2;">
-    <button slot="ar-button" class="ar-button">
-      🚀 Place in YOUR World
-    </button>
-  </model-viewer>
+  <div id="header">
+    <button id="back-btn" onclick="window.location.href='index.html'">← Back</button>
+    <h1>🌀 TWIST AR</h1>
+    <p>Choose a character · Place it in your world</p>
+  </div>
 
-  <button id="exit" onclick="window.location.href='index.html'">← Back to TwistQR</button>
+  <div id="viewer-wrap">
+    <model-viewer
+      id="mv"
+      src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+      alt="AR object"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      camera-controls
+      auto-rotate
+      shadow-intensity="1"
+      exposure="1">
+      <button slot="ar-button" class="ar-btn">🚀 Place in Your World</button>
+    </model-viewer>
+  </div>
 
-  <p style="margin-top: 20px; font-size: 0.75rem; color: #555;">Pinch to scale · Tap to move · Walk around it!</p>
+  <div id="info">Spin the model with your finger — then tap <b>Place in Your World</b> to launch AR</div>
+
+  <div id="selector">
+    <h3>Pick Your Character</h3>
+    <div id="model-grid">
+      <div class="model-card active" onclick="switchModel(this, 'https://modelviewer.dev/shared-assets/models/Astronaut.glb', '🧑‍🚀', 'Astronaut')">
+        <span class="emoji">🧑‍🚀</span>
+        <span class="label">Astronaut</span>
+      </div>
+      <div class="model-card" onclick="switchModel(this, 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', '🤖', 'Robot')">
+        <span class="emoji">🤖</span>
+        <span class="label">Robot</span>
+      </div>
+      <div class="model-card" onclick="switchModel(this, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', '🦆', 'Duck')">
+        <span class="emoji">🦆</span>
+        <span class="label">Duck</span>
+      </div>
+      <div class="model-card" onclick="switchModel(this, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb', '🦊', 'Fox')">
+        <span class="emoji">🦊</span>
+        <span class="label">Fox</span>
+      </div>
+      <div class="model-card" onclick="switchModel(this, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', '⛑️', 'Helmet')">
+        <span class="emoji">⛑️</span>
+        <span class="label">Helmet</span>
+      </div>
+      <div class="model-card" onclick="switchModel(this, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/FlightHelmet/glTF/FlightHelmet.gltf', '🪖', 'Pilot')">
+        <span class="emoji">🪖</span>
+        <span class="label">Pilot</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchModel(card, src, emoji, label) {
+      // Update active card
+      document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+
+      // Switch model
+      const mv = document.getElementById('mv');
+      mv.src = src;
+      mv.alt = label;
+
+      // Update button
+      const btn = mv.querySelector('.ar-btn');
+      btn.innerText = emoji + ' Place ' + label + ' in Your World';
+    }
+  </script>
 </body>
 </html>
