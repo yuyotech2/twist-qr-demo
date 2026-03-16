@@ -49,23 +49,17 @@
     #ar-canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
     
     .ar-object { 
-      position: absolute; width: 180px; height: 180px; pointer-events: auto; touch-action: none; 
+      position: absolute; width: 220px; height: 220px; pointer-events: auto; touch-action: none; 
       filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
       display: flex; align-items: center; justify-content: center;
       transition: border 0.2s;
       animation: spawn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    @keyframes spawn { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+    @keyframes spawn { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 100% { transform: scale(var(--sc, 1)) rotate(var(--rot, 0deg)); opacity: 1; } }
     
     .ar-object.selected { border: 2px solid var(--primary); border-radius: 15px; background: rgba(0, 245, 255, 0.1); z-index: 2000 !important; }
     .delete-btn { position: absolute; top: -15px; right: -15px; background: var(--danger); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: 900; font-size: 18px; display: none; box-shadow: 0 0 10px rgba(255,0,0,0.5); z-index: 2010; cursor: pointer; }
     .ar-object.selected .delete-btn { display: block; }
-
-    /* Precision Sidebar */
-    #sidebar-controls { position: absolute; right: 20px; top: 120px; display: flex; flex-direction: column; gap: 20px; pointer-events: auto; z-index: 1010; padding: 15px; background: rgba(0,0,0,0.7); border-radius: 20px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-    .control-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-    .control-label { font-size: 0.5rem; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
-    input[type=range] { -webkit-appearance: slider-vertical; width: 12px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 5px; cursor: pointer; }
 
     /* Massive Catalog */
     #in-cam-selector { 
@@ -88,6 +82,9 @@
     
     #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; opacity: 0; pointer-events: none; }
     #status-msg { position: absolute; top: 80px; width: 100%; text-align: center; color: var(--primary); font-weight: 900; letter-spacing: 3px; text-shadow: 0 2px 15px black; pointer-events: none; z-index: 1001; }
+    
+    /* Gestures Tip */
+    #gestures-tip { position: absolute; top: 120px; right: 20px; width: 100px; text-align: right; color: var(--primary); font-size: 0.6rem; font-weight: 900; pointer-events: none; text-transform: uppercase; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -117,14 +114,8 @@
   <div id="ar-camera-view">
     <video id="v-feed" autoplay playsinline></video>
     <div id="ar-canvas-layer"></div>
-    <div id="status-msg">3D MULTI-OBJECT ENGINE</div>
-
-    <div id="sidebar-controls">
-      <div class="control-group">
-        <span class="control-label">SIZE</span>
-        <input type="range" id="size-slider" min="0.3" max="5" step="0.1" value="1" oninput="updateItem()">
-      </div>
-    </div>
+    <div id="status-msg">GGESTURE ENGINE ACTIVE</div>
+    <div id="gestures-tip">↔ DRAG MOVE<br>↺ ONE FINGER ROTATE<br>⤢ TWO FINGER PINCH SIZE</div>
 
     <!-- FULL SUPREME CATALOG -->
     <div id="in-cam-selector">
@@ -141,7 +132,7 @@
           <div class="cam-item" onclick="addItem('emoji:👽', 'ALIEN')"><span>👽</span><span class="cam-label">Alien</span></div>
         </div>
 
-        <!-- FURNITURE SECTION (TRUE 3D + HOLOGRAMS) -->
+        <!-- FURNITURE SECTION -->
         <div class="catalog-section">
           <span class="section-label">Home</span>
           <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb', 'COUCH')"><span>🛋️</span><span class="cam-label">Couch</span></div>
@@ -192,7 +183,6 @@
     const camera = document.getElementById('ar-camera-view');
     const canvas = document.getElementById('ar-canvas-layer');
     const vFeed = document.getElementById('v-feed');
-    const sizeS = document.getElementById('size-slider');
     const flash = document.getElementById('flash');
     
     let currentMode = 'play';
@@ -257,16 +247,19 @@
     function addItem(src, label) {
         const obj = document.createElement('div');
         obj.className = 'ar-object';
-        // Randomize spawn position slightly so they don't perfect overlap
         const offX = (Math.random() * 60) - 30;
         const offY = (Math.random() * 60) - 30;
         obj.style.left = `calc(50% + ${offX}px)`;
         obj.style.top = `calc(40% + ${offY}px)`;
-        obj.style.transform = 'scale(1)';
+        
+        // Initial state
+        obj.style.setProperty('--sc', '1');
+        obj.style.setProperty('--rot', '0deg');
+        obj.style.transform = 'scale(var(--sc)) rotate(var(--rot))';
         
         if (src.startsWith('emoji:')) {
             const emoji = src.replace('emoji:', '');
-            obj.innerHTML = `<div style="font-size: 6rem; filter: drop-shadow(0 0 10px white);">${emoji}</div>`;
+            obj.innerHTML = `<div style="font-size: 7rem; filter: drop-shadow(0 0 10px white);">${emoji}</div>`;
         } else {
             const mv = document.createElement('model-viewer');
             mv.src = src;
@@ -282,15 +275,11 @@
         const btn = document.createElement('button');
         btn.className = 'delete-btn';
         btn.innerHTML = '✕';
-        btn.onclick = (e) => { 
-            e.stopPropagation(); 
-            obj.remove();
-            if(selectedItem === obj) selectedItem = null;
-        };
+        btn.onclick = (e) => { e.stopPropagation(); obj.remove(); };
         obj.appendChild(btn);
 
         canvas.appendChild(obj);
-        makeDraggable(obj);
+        attachGestures(obj);
         selectObject(obj);
     }
 
@@ -299,22 +288,88 @@
         selectedItem = el;
         document.querySelectorAll('.ar-object').forEach(o => o.classList.remove('selected'));
         el.classList.add('selected');
-        const match = el.style.transform.match(/scale\((.*?)\)/);
-        sizeS.value = match ? match[1] : 1;
     }
 
-    function updateItem() {
-        if (!selectedItem) return;
-        selectedItem.style.transform = `scale(${sizeS.value})`;
+    function attachGestures(el) {
+        let startX, startY;
+        let initialScale = 1;
+        let initialRot = 0;
+        let startDist = 0;
+        
+        el.addEventListener('touchstart', (e) => {
+            if(e.target.tagName === 'BUTTON') return;
+            selectObject(el);
+            
+            if (e.touches.length === 1) {
+                startX = e.touches[0].clientX - el.offsetLeft;
+                startY = e.touches[0].clientY - el.offsetTop;
+            } else if (e.touches.length === 2) {
+                startDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                initialScale = parseFloat(el.style.getPropertyValue('--sc')) || 1;
+            }
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (selectedItem !== el) return;
+            
+            if (e.touches.length === 1) {
+                // One finger: DRAG if it moves, but we want ROTATE too?
+                // User said: one finger to ROTATE, but usually one finger moves.
+                // Let's do: Hold and drag to MOVE. 
+                // Wait, user said "one finger to rotate it". 
+                // Let's make it so if you drag the SIDES it rotates, or if you rotate with a swipe.
+                // Most intuitive for "one finger rotate" is horizontal swipe.
+                
+                // Let's implement: Drag to move, but if you swipe horizontally at the bottom it rotates?
+                // Or let's just use horizontal movement for rotation if a modifier is met?
+                // Actually, let's just do: One finger drag = MOVE, but add a rotate button? 
+                // No, user specifically asked for "one finger to rotate it".
+                // Let's make it so horizontal swipe = rotate, vertical swipe = move? 
+                // That's confusing. Let's do: 
+                // Two fingers = PINCH (Size)
+                // One finger = DRAG MOVE
+                // Wait, user said: "one finger to rotate it".
+                // Okay, let's do: One finger = ROTATE. Two fingers = SCALE.
+                // How to move? Maybe double tap to move?
+                // Let's stick to: One finger = MOVE + ROTATE (Drag to move, but if moving slowly horizontally it rotates).
+                // Better: Drag = MOVE. Long Press = ROTATE.
+                // EVEN BETTER: Let's follow "one finger rotate" by mapping horizontal movement to rotation.
+                
+                const currentRot = parseFloat(el.style.getPropertyValue('--rot')) || 0;
+                const dx = e.touches[0].clientX - (startX + el.offsetLeft);
+                
+                // Move logic
+                el.style.left = (e.touches[0].clientX - startX) + 'px';
+                el.style.top = (e.touches[0].clientY - startY) + 'px';
+                
+                // Rotate logic (if moving horizontally)
+                const rotAmount = dx * 0.5; 
+                el.style.setProperty('--rot', (currentRot + rotAmount) + 'deg');
+                
+            } else if (e.touches.length === 2) {
+                const currentDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const scale = (currentDist / startDist) * initialScale;
+                const finalScale = Math.min(Math.max(scale, 0.3), 5);
+                el.style.setProperty('--sc', finalScale);
+            }
+            
+            el.style.transform = `scale(var(--sc)) rotate(var(--rot))`;
+        });
     }
 
     function saveDesign() {
       flash.style.opacity = '1';
       setTimeout(() => flash.style.opacity = '0', 200);
-      alert('📸 Design Snapshot Saved!');
+      alert('📸 Design Saved!');
     }
 
-    function clearAll() { canvas.innerHTML = ''; selectedItem = null; }
+    function clearAll() { canvas.innerHTML = ''; }
 
     function uploadToAR(input) {
         if (input.files[0]) {
@@ -323,29 +378,16 @@
               const obj = document.createElement('div');
               obj.className = 'ar-object';
               obj.style.left = '50%'; obj.style.top = '40%';
-              obj.style.transform = 'scale(1)';
+              obj.style.setProperty('--sc', '1');
+              obj.style.setProperty('--rot', '0deg');
+              obj.style.transform = 'scale(1) rotate(0deg)';
               obj.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:15px;"><button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
               canvas.appendChild(obj);
-              makeDraggable(obj);
+              attachGestures(obj);
               selectObject(obj);
             }
             reader.readAsDataURL(input.files[0]);
         }
-    }
-
-    function makeDraggable(el) {
-        let dragging = false;
-        el.addEventListener('touchstart', (e) => { 
-          if(e.target.tagName === 'BUTTON') return;
-          dragging = true; selectObject(el); 
-        });
-        window.addEventListener('touchmove', (e) => {
-            if (!dragging) return;
-            const t = e.touches[0];
-            el.style.left = (t.clientX - 90) + 'px';
-            el.style.top = (t.clientY - 90) + 'px';
-        });
-        window.addEventListener('touchend', () => { dragging = false; });
     }
 
     setMode('play');
