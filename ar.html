@@ -40,7 +40,7 @@
     #selector-strip { background: rgba(0,0,0,0.6); padding: 25px 0 45px; border-top: 1px solid rgba(255,255,255,0.05); }
     .scroller { display: flex; gap: 15px; overflow-x: auto; padding: 0 20px; }
     .scroller::-webkit-scrollbar { display: none; }
-    .char-card { flex: 0 0 95px; height: 110px; background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.1); border-radius: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+    .char-card { flex: 0 0 95px; height: 110px; background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.1); border-radius: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
     .char-card.active.play { border-color: var(--primary); background: rgba(0,245,255,0.1); }
     .char-card.active.work { border-color: var(--work-accent); background: rgba(76,175,80,0.1); }
     .char-card .icon { font-size: 2rem; }
@@ -49,61 +49,50 @@
     #ar-canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
     
     .ar-object { 
-      position: absolute; width: 160px; height: 160px; pointer-events: auto; touch-action: none; 
+      position: absolute; width: 180px; height: 180px; pointer-events: auto; touch-action: none; 
       filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
       display: flex; align-items: center; justify-content: center;
-      transition: transform 0.1s;
+      transition: border 0.2s;
       animation: spawn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     @keyframes spawn { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
     
-    .ar-object.selected { border: 2px solid var(--primary); border-radius: 15px; background: rgba(0, 245, 255, 0.1); padding: 10px; z-index: 2000 !important; }
-    .delete-btn { position: absolute; top: -15px; right: -15px; background: var(--danger); color: white; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: 900; font-size: 16px; display: none; box-shadow: 0 0 10px rgba(255,0,0,0.5); z-index: 2010; }
+    .ar-object.selected { border: 2px solid var(--primary); border-radius: 15px; background: rgba(0, 245, 255, 0.1); z-index: 2000 !important; }
+    .delete-btn { position: absolute; top: -15px; right: -15px; background: var(--danger); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: 900; font-size: 18px; display: none; box-shadow: 0 0 10px rgba(255,0,0,0.5); z-index: 2010; cursor: pointer; }
     .ar-object.selected .delete-btn { display: block; }
 
     /* Precision Sidebar */
-    #sidebar-controls { position: absolute; right: 20px; top: 120px; display: flex; flex-direction: column; gap: 20px; pointer-events: auto; z-index: 1010; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+    #sidebar-controls { position: absolute; right: 20px; top: 120px; display: flex; flex-direction: column; gap: 20px; pointer-events: auto; z-index: 1010; padding: 15px; background: rgba(0,0,0,0.7); border-radius: 20px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
     .control-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
     .control-label { font-size: 0.5rem; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
-    input[type=range] { -webkit-appearance: slider-vertical; width: 10px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 5px; cursor: pointer; }
+    input[type=range] { -webkit-appearance: slider-vertical; width: 12px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 5px; cursor: pointer; }
 
     /* Massive Catalog */
     #in-cam-selector { 
-      position: absolute; bottom: 120px; left: 0; width: 100%; height: 120px; 
-      display: flex; gap: 12px; overflow-x: auto; padding: 15px 20px; 
+      position: absolute; bottom: 120px; left: 0; width: 100%; height: 130px; 
+      display: flex; gap: 12px; overflow-x: auto; padding: 20px; 
       pointer-events: auto; z-index: 1005; backdrop-filter: blur(25px);
-      background: rgba(0,0,0,0.8); border-top: 2px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.85); border-top: 2px solid rgba(255,255,255,0.1);
       align-items: center; scrollbar-width: none;
     }
-    .catalog-section { display: flex; gap: 10px; padding-right: 20px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 10px; }
+    .catalog-section { display: flex; gap: 12px; padding-right: 25px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 15px; height: 100%; align-items: center; }
     .catalog-section:last-child { border-right: none; }
-    .section-label { writing-mode: vertical-lr; font-size: 0.45rem; color: #555; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+    .section-label { writing-mode: vertical-lr; font-size: 0.5rem; color: #666; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; height: 80%; text-align: center; }
 
-    .cam-item { flex: 0 0 70px; height: 70px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.8rem; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; position: relative; }
-    .cam-item:active { transform: scale(0.9); }
-    .cam-label { font-size: 0.4rem; text-transform: uppercase; font-weight: 900; margin-top: 3px; color: #666; letter-spacing: 1px; }
+    .cam-item { flex: 0 0 75px; height: 75px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.8rem; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; position: relative; cursor: pointer; }
+    .cam-item:active { transform: scale(0.9); background: rgba(255,245,255,0.15); }
+    .cam-label { font-size: 0.4rem; text-transform: uppercase; font-weight: 900; margin-top: 3px; color: #888; letter-spacing: 1px; }
 
     .ar-bottom-controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; gap: 15px; pointer-events: auto; z-index: 1005; }
-    .ar-btn { background: rgba(0,0,0,0.85); border: 2px solid white; color: white; padding: 14px 25px; border-radius: 50px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; transition: 0.3s; }
+    .ar-btn { background: rgba(0,0,0,0.85); border: 2px solid white; color: white; padding: 14px 28px; border-radius: 50px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; cursor: pointer; }
     
     #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; opacity: 0; pointer-events: none; }
-    #status-msg { position: absolute; top: 80px; width: 100%; text-align: center; color: var(--primary); font-weight: 900; letter-spacing: 3px; text-shadow: 0 2px 15px black; pointer-events: none; }
-    
-    /* Tutorial Overlay */
-    #tut { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; cursor: pointer; }
-    #tut h2 { color: var(--primary); font-size: 2.22rem; margin-bottom: 15px; }
-    #tut p { color: #888; line-height: 1.6; }
+    #status-msg { position: absolute; top: 80px; width: 100%; text-align: center; color: var(--primary); font-weight: 900; letter-spacing: 3px; text-shadow: 0 2px 15px black; pointer-events: none; z-index: 1001; }
   </style>
 </head>
 <body>
 
   <div id="flash"></div>
-
-  <div id="tut" onclick="this.style.opacity='0'; setTimeout(()=>this.style.display='none', 500)">
-    <h2>Everything 3D</h2>
-    <p>Tap items to add real 3D models.<br>Drag to position.<br>Slide to size.<br>Tap any item to select it.</p>
-    <button class="btn-launch" style="margin-top:40px;">ENTER HUB</button>
-  </div>
 
   <div id="main-menu">
     <header id="header">
@@ -119,7 +108,7 @@
       <div class="preview-box">
         <model-viewer id="main-view" src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" ar ar-modes="webxr" camera-controls auto-rotate shadow-intensity="1"></model-viewer>
       </div>
-      <button class="btn-launch" onclick="enterAR()">🚀 LAUNCH DESIGNER</button>
+      <button class="btn-launch" onclick="enterAR()">🚀 LAUNCH 3D WORLD</button>
     </div>
 
     <div id="selector-strip"><div id="scroller" class="scroller"></div></div>
@@ -128,43 +117,72 @@
   <div id="ar-camera-view">
     <video id="v-feed" autoplay playsinline></video>
     <div id="ar-canvas-layer"></div>
-    <div id="status-msg">3D MULTI-OBJECT ACTIVE</div>
+    <div id="status-msg">3D MULTI-OBJECT ENGINE</div>
 
-    <!-- TRANSFORM CONTROLS -->
     <div id="sidebar-controls">
       <div class="control-group">
         <span class="control-label">SIZE</span>
-        <input type="range" id="size-slider" min="0.5" max="3" step="0.1" value="1" oninput="updateItem()">
+        <input type="range" id="size-slider" min="0.3" max="5" step="0.1" value="1" oninput="updateItem()">
       </div>
     </div>
 
-    <!-- SUPREME 3D CATALOG -->
+    <!-- FULL SUPREME CATALOG -->
     <div id="in-cam-selector">
         
         <!-- SOULS SECTION -->
         <div class="catalog-section">
           <span class="section-label">Souls</span>
-          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/Astronaut.glb')"><span>🧑‍🚀</span><span class="cam-label">Astro</span></div>
-          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb')"><span>🤖</span><span class="cam-label">Robot</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb')"><span>🦊</span><span class="cam-label">Fox</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb')"><span>🦆</span><span class="cam-label">Duck</span></div>
+          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/Astronaut.glb', 'ASTRO')"><span>🧑‍🚀</span><span class="cam-label">Astro</span></div>
+          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', 'ROBOT')"><span>🤖</span><span class="cam-label">Robot</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb', 'FOX')"><span>🦊</span><span class="cam-label">Fox</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', 'DUCK')"><span>🦆</span><span class="cam-label">Duck</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🐉', 'DRAGON')"><span>🐉</span><span class="cam-label">Dragon</span></div>
+          <div class="cam-item" onclick="addItem('emoji:👻', 'GHOST')"><span>👻</span><span class="cam-label">Ghost</span></div>
+          <div class="cam-item" onclick="addItem('emoji:👽', 'ALIEN')"><span>👽</span><span class="cam-label">Alien</span></div>
         </div>
 
-        <!-- FURNITURE 3D SECTION -->
+        <!-- FURNITURE SECTION (TRUE 3D + HOLOGRAMS) -->
         <div class="catalog-section">
           <span class="section-label">Home</span>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb')"><span>🛋️</span><span class="cam-label">Couch</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb')"><span>🪑</span><span class="cam-label">Chair</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb')"><span>📦</span><span class="cam-label">Box</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb', 'COUCH')"><span>🛋️</span><span class="cam-label">Couch</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb', 'CHAIR')"><span>🪑</span><span class="cam-label">Chair</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb', 'BOOMBOX')"><span>📻</span><span class="cam-label">Music</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb', 'LANTERN')"><span>🏮</span><span class="cam-label">Lamp</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🛏️', 'BED')"><span>🛏️</span><span class="cam-label">Bed</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🖥️', 'DESK')"><span>🖥️</span><span class="cam-label">Desk</span></div>
+          <div class="cam-item" onclick="addItem('emoji:📚', 'BOOKS')"><span>📚</span><span class="cam-label">Shelf</span></div>
+          <div class="cam-item" onclick="addItem('emoji:📺', 'TV')"><span>📺</span><span class="cam-label">TV</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🎹', 'PIANO')"><span>🎹</span><span class="cam-label">Piano</span></div>
+        </div>
+
+        <!-- NATURE & LIFE -->
+        <div class="catalog-section">
+          <span class="section-label">Life</span>
+          <div class="cam-item" onclick="addItem('emoji:🌲', 'TREE')"><span>🌲</span><span class="cam-label">Tree</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🌻', 'FLOWER')"><span>🌻</span><span class="cam-label">Flower</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🍕', 'PIZZA')"><span>🍕</span><span class="cam-label">Pizza</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🍦', 'ICE CREAM')"><span>🍦</span><span class="cam-label">Cream</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🍔', 'BURGER')"><span>🍔</span><span class="cam-label">Burger</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🍄', 'MUSHY')"><span>🍄</span><span class="cam-label">Mushy</span></div>
+        </div>
+
+        <!-- EXTRAS -->
+        <div class="catalog-section">
+          <span class="section-label">Extra</span>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', 'HELMET')"><span>⛑️</span><span class="cam-label">Helmet</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb', 'BOX')"><span>📦</span><span class="cam-label">Box</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🪐', 'PLANET')"><span>🪐</span><span class="cam-label">Planet</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🚀', 'ROCKET')"><span>🚀</span><span class="cam-label">Rocket</span></div>
+          <div class="cam-item" onclick="addItem('emoji:🔥', 'FIRE')"><span>🔥</span><span class="cam-label">Fire</span></div>
           <div class="cam-item" onclick="document.getElementById('file-in').click()"><span>🖼️</span><span class="cam-label">Upload</span></div>
         </div>
 
     </div>
 
     <div class="ar-bottom-controls">
-        <button class="ar-btn" onclick="clearAll()" style="border-color: var(--danger); color: var(--danger);">RESET</button>
+        <button class="ar-btn" onclick="clearAll()" style="border-color: var(--danger); color: var(--danger);">RESET ROOM</button>
         <button class="ar-btn" onclick="exitAR()" style="background: var(--danger);">✕ EXIT</button>
-        <button class="ar-btn" onclick="saveDesign()">SNAP</button>
+        <button class="ar-btn" onclick="saveDesign()">SAVE SNAPSHOT</button>
     </div>
     <input type="file" id="file-in" style="display:none" onchange="uploadToAR(this)">
   </div>
@@ -190,7 +208,8 @@
       work: [
         { name: 'Couch', icon: '🛋️', src: 'https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb' },
         { name: 'Chair', icon: '🪑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb' },
-        { name: 'Box', icon: '📦', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb' }
+        { name: 'Music', icon: '📻', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb' },
+        { name: 'Lamp', icon: '🏮', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb' }
       ]
     };
 
@@ -224,7 +243,7 @@
         try {
           const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
           vFeed.srcObject = s;
-          addItem(catalog[currentMode][0].src);
+          addItem(catalog[currentMode][0].src, catalog[currentMode][0].name);
         } catch(e) { exitAR(); }
     }
 
@@ -235,22 +254,40 @@
         clearAll();
     }
 
-    function addItem(src) {
+    function addItem(src, label) {
         const obj = document.createElement('div');
         obj.className = 'ar-object';
-        obj.style.left = '50%';
-        obj.style.top = '40%';
+        // Randomize spawn position slightly so they don't perfect overlap
+        const offX = (Math.random() * 60) - 30;
+        const offY = (Math.random() * 60) - 30;
+        obj.style.left = `calc(50% + ${offX}px)`;
+        obj.style.top = `calc(40% + ${offY}px)`;
+        obj.style.transform = 'scale(1)';
         
-        let mv = document.createElement('model-viewer');
-        mv.src = src;
-        mv.style.width = '100%';
-        mv.style.height = '100%';
-        mv.setAttribute('auto-rotate', '');
-        mv.setAttribute('shadow-intensity', '1');
-        mv.setAttribute('camera-controls', '');
+        if (src.startsWith('emoji:')) {
+            const emoji = src.replace('emoji:', '');
+            obj.innerHTML = `<div style="font-size: 6rem; filter: drop-shadow(0 0 10px white);">${emoji}</div>`;
+        } else {
+            const mv = document.createElement('model-viewer');
+            mv.src = src;
+            mv.style.width = '100%';
+            mv.style.height = '100%';
+            mv.setAttribute('auto-rotate', '');
+            mv.setAttribute('shadow-intensity', '1');
+            mv.setAttribute('camera-controls', 'none');
+            mv.setAttribute('touch-action', 'none');
+            obj.appendChild(mv);
+        }
         
-        obj.appendChild(mv);
-        obj.innerHTML += `<button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
+        const btn = document.createElement('button');
+        btn.className = 'delete-btn';
+        btn.innerHTML = '✕';
+        btn.onclick = (e) => { 
+            e.stopPropagation(); 
+            obj.remove();
+            if(selectedItem === obj) selectedItem = null;
+        };
+        obj.appendChild(btn);
 
         canvas.appendChild(obj);
         makeDraggable(obj);
@@ -258,12 +295,12 @@
     }
 
     function selectObject(el) {
+        if (!el) return;
         selectedItem = el;
         document.querySelectorAll('.ar-object').forEach(o => o.classList.remove('selected'));
         el.classList.add('selected');
-        // We use the scale of the outer div for simplicity here
-        const currentScale = el.style.transform.match(/scale\((.*?)\)/);
-        sizeS.value = currentScale ? currentScale[1] : 1;
+        const match = el.style.transform.match(/scale\((.*?)\)/);
+        sizeS.value = match ? match[1] : 1;
     }
 
     function updateItem() {
@@ -274,7 +311,7 @@
     function saveDesign() {
       flash.style.opacity = '1';
       setTimeout(() => flash.style.opacity = '0', 200);
-      alert('📸 Supreme Design Snapshot Captured!');
+      alert('📸 Design Snapshot Saved!');
     }
 
     function clearAll() { canvas.innerHTML = ''; selectedItem = null; }
@@ -283,10 +320,10 @@
         if (input.files[0]) {
             const reader = new FileReader();
             reader.onload = e => {
-              // Custom photos are still 2D sprites in the 3D world
               const obj = document.createElement('div');
               obj.className = 'ar-object';
               obj.style.left = '50%'; obj.style.top = '40%';
+              obj.style.transform = 'scale(1)';
               obj.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:15px;"><button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
               canvas.appendChild(obj);
               makeDraggable(obj);
@@ -305,8 +342,8 @@
         window.addEventListener('touchmove', (e) => {
             if (!dragging) return;
             const t = e.touches[0];
-            el.style.left = (t.clientX - 80) + 'px';
-            el.style.top = (t.clientY - 80) + 'px';
+            el.style.left = (t.clientX - 90) + 'px';
+            el.style.top = (t.clientY - 90) + 'px';
         });
         window.addEventListener('touchend', () => { dragging = false; });
     }
