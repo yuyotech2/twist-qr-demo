@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>TwistQR | AR Design Hub</title>
+  <title>TwistQR | AR Designer Supreme</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     :root {
@@ -17,7 +17,10 @@
 
     /* UI Containers */
     #main-menu { position: relative; height: 100vh; display: flex; flex-direction: column; z-index: 10; background: var(--bg); transition: 0.5s; }
-    
+    #ar-camera-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000; background: #000; display: none; }
+    #v-feed { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+    #ar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
+
     /* Header */
     #header { padding: 15px; border-bottom: 2px solid var(--primary); text-align: center; background: rgba(0,0,0,0.9); }
     #header h1 { font-size: 0.8rem; letter-spacing: 5px; color: var(--primary); margin-bottom: 12px; font-weight: 900; text-transform: uppercase; }
@@ -32,10 +35,8 @@
     .preview-box { width: 280px; height: 280px; border-radius: 50px; border: 2px solid rgba(138,43,226,0.3); position: relative; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(138,43,226,0.1) 0%, transparent 70%); }
     model-viewer { width: 100%; height: 100%; }
     
-    .btn-launch { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 22px 50px; border-radius: 50px; font-weight: 900; font-size: 1.2rem; letter-spacing: 3px; margin-top: 40px; box-shadow: 0 10px 40px rgba(138,43,226,0.4); cursor: pointer; transition: 0.3s; width: 320px; }
-    .btn-launch:active { transform: scale(0.95); opacity: 0.8; }
-    
-    #native-hint { margin-top: 15px; color: #666; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 900; }
+    .btn-launch { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 22px 50px; border-radius: 50px; font-weight: 900; font-size: 1.1rem; letter-spacing: 3px; margin-top: 30px; box-shadow: 0 10px 40px rgba(138,43,226,0.4); cursor: pointer; transition: 0.3s; }
+    .btn-designer { background: rgba(255,255,255,0.15); border: 2px solid white; color: white; padding: 18px 40px; border-radius: 50px; font-weight: 900; font-size: 0.9rem; margin-top: 15px; cursor: pointer; }
 
     /* Bottom Scroller Menu */
     #selector-strip { background: rgba(0,0,0,0.6); padding: 25px 0 45px; border-top: 1px solid rgba(255,255,255,0.05); }
@@ -46,36 +47,39 @@
     .char-card.active.work { border-color: var(--work-accent); background: rgba(76,175,80,0.1); }
     .char-card .icon { font-size: 2rem; }
 
-    /* Custom AR Sticker Mode (For Fallback/Design) */
-    #custom-ar-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000; background: #000; display: none; }
-    #v-feed { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-    #ar-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
-    .sticker { 
-        position: absolute; width: 250px; height: 250px; pointer-events: auto; touch-action: none;
-        display: flex; align-items: center; justify-content: center;
+    /* Designer Elements */
+    .ar-object { 
+      position: absolute; width: 200px; height: 200px; pointer-events: auto; touch-action: none; 
+      filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1002;
     }
-    .sticker-handle {
-        position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
-        background: var(--primary); color: #000; width: 44px; height: 44px; 
-        border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem; font-weight: bold; z-index: 10; box-shadow: 0 4px 15px rgba(0,245,255,0.5);
-    }
+    .delete-btn { position: absolute; top: -15px; right: -15px; background: var(--danger); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: 900; font-size: 18px; box-shadow: 0 0 10px rgba(255,0,0,0.5); z-index: 2010; cursor: pointer; }
 
-    /* Catalog in Camera */
+    /* In-Camera Catalog */
     #cam-catalog { 
-      position: absolute; bottom: 120px; left: 0; width: 100%; height: 130px; 
-      display: flex; gap: 12px; overflow-x: auto; padding: 20px; 
-      pointer-events: auto; z-index: 1005; backdrop-filter: blur(25px);
-      background: rgba(0,0,0,0.85); border-top: 2px solid rgba(255,255,255,0.1);
+      position: absolute; bottom: 120px; left: 0; width: 100vw; height: 140px; 
+      display: flex; gap: 12px; overflow-x: auto; padding: 20px 30px; 
+      pointer-events: auto; z-index: 1005; backdrop-filter: blur(30px);
+      background: rgba(0,0,0,0.8); border-top: 2px solid rgba(255,255,255,0.1);
       align-items: center; scrollbar-width: none;
     }
-    .cam-item { flex: 0 0 75px; height: 75px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+    .section-group { display: flex; gap: 12px; padding-right: 25px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 15px; align-items: center; height: 100%; }
+    .section-group:last-child { border-right: none; }
+    .group-label { writing-mode: vertical-lr; font-size: 0.5rem; color: #555; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+
+    .cam-item { flex: 0 0 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2.22rem; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+    .cam-item:active { transform: scale(0.9); background: rgba(0,245,255,0.2); }
 
     .ar-controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; gap: 15px; pointer-events: auto; z-index: 1005; }
-    .ar-btn { background: rgba(0,0,0,0.85); border: 2px solid white; color: white; padding: 14px 28px; border-radius: 50px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; cursor: pointer; }
+    .ar-btn { background: rgba(0,0,0,0.85); border: 2px solid white; color: white; padding: 15px 30px; border-radius: 50px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; cursor: pointer; }
+    
+    #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; opacity: 0; pointer-events: none; }
   </style>
 </head>
 <body>
+
+  <div id="flash"></div>
 
   <div id="main-menu">
     <header id="header">
@@ -93,34 +97,33 @@
             <button slot="ar-button" id="real-ar-btn" style="display:none;"></button>
         </model-viewer>
       </div>
-      <!-- THIS IS THE BUTTON FOR THE "OLD WAY" (Native) -->
-      <button class="btn-launch" onclick="launchNative()">🚀 LAUNCH AR (OLD WAY)</button>
-      <p id="native-hint">Best for real interaction & movement</p>
-      
-      <!-- THIS IS THE BUTTON FOR THE MULTI-DESIGNER -->
-      <button class="btn-launch" style="background: rgba(255,255,255,0.1); border: 1px solid white; margin-top:20px;" onclick="enterDesigner()">🛠️ PHOTO DESIGNER</button>
+      <button class="btn-launch" onclick="document.getElementById('real-ar-btn').click()">🚀 LAUNCH REAL AR (One Item)</button>
+      <button class="btn-designer" onclick="enterDesigner()">🛠️ START MULTI-DESIGNER</button>
+      <p style="margin-top:15px; color:#444; font-size:0.6rem; letter-spacing:1px; font-weight:900;">REAL AR = Perfect movement | DESIGNER = Many items</p>
     </div>
 
     <div id="selector-strip"><div id="scroller" class="scroller"></div></div>
   </div>
 
-  <!-- Custom Designer View -->
-  <div id="custom-ar-view">
+  <div id="ar-camera-view">
     <video id="v-feed" autoplay playsinline></video>
-    <div id="ar-canvas"></div>
+    <div id="ar-overlay"></div>
     <div id="cam-catalog"></div>
     <div class="ar-controls">
-        <button class="ar-btn" onclick="exitDesigner()" style="background: var(--danger);">✕ EXIT</button>
+        <button class="ar-btn" onclick="clearAll()" style="color:var(--danger); border-color:var(--danger);">RESET</button>
+        <button class="ar-btn" onclick="exitDesigner()" style="background:var(--danger);">✕ EXIT</button>
+        <button class="ar-btn" onclick="saveDesign()">SNAP</button>
     </div>
+    <input type="file" id="file-in" style="display:none" onchange="uploadToDesigner(this)">
   </div>
 
   <script>
     const menu = document.getElementById('main-menu');
-    const mainMv = document.getElementById('main-view');
-    const designer = document.getElementById('custom-ar-view');
-    const canvas = document.getElementById('ar-canvas');
+    const designer = document.getElementById('ar-camera-view');
+    const overlay = document.getElementById('ar-overlay');
     const vFeed = document.getElementById('v-feed');
     const camCat = document.getElementById('cam-catalog');
+    const mainMv = document.getElementById('main-view');
     
     let currentMode = 'play';
 
@@ -134,7 +137,8 @@
       work: [
         { name: 'Couch', icon: '🛋️', src: 'https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb' },
         { name: 'Chair', icon: '🪑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb' },
-        { name: 'Box', icon: '📦', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb' }
+        { name: 'Lamp', icon: '🏮', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb' },
+        { name: 'Music', icon: '📻', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb' }
       ]
     };
 
@@ -162,12 +166,6 @@
         if(scroller.firstChild) scroller.firstChild.click();
     }
 
-    // THE OLD WAY (NATIVE WebXR)
-    function launchNative() {
-        document.getElementById('real-ar-btn').click();
-    }
-
-    // THE DESIGNER WAY (MULTI-PHOTO)
     async function enterDesigner() {
         menu.style.display = 'none';
         designer.style.display = 'block';
@@ -182,44 +180,97 @@
         menu.style.display = 'flex';
         designer.style.display = 'none';
         if(vFeed.srcObject) vFeed.srcObject.getTracks().forEach(t => t.stop());
-        canvas.innerHTML = '';
+        overlay.innerHTML = '';
     }
 
     function renderCamCatalog() {
         camCat.innerHTML = '';
-        catalog[currentMode].forEach(item => {
-            let div = document.createElement('div');
-            div.className = 'cam-item';
-            div.innerHTML = item.icon;
-            div.onclick = () => addSticker(item.icon);
-            camCat.appendChild(div);
+        // Group 1: Souls
+        let souls = document.createElement('div'); souls.className = 'section-group';
+        souls.innerHTML = '<span class="group-label">Souls</span>';
+        ['🧑‍🚀', '🤖', '🦊', '🦆', '🐉', '👻'].forEach(icon => {
+            let item = document.createElement('div'); item.className = 'cam-item'; item.innerHTML = icon;
+            item.onclick = () => addDesignerItem(icon); souls.appendChild(item);
         });
+        // Group 2: Home
+        let home = document.createElement('div'); home.className = 'section-group';
+        home.innerHTML = '<span class="group-label">Home</span>';
+        ['🛋️', '🪑', '🛏️', '🖥️', '📺', '🎹'].forEach(icon => {
+            let item = document.createElement('div'); item.className = 'cam-item'; item.innerHTML = icon;
+            item.onclick = () => addDesignerItem(icon); home.appendChild(item);
+        });
+        // Group 3: Extra
+        let extra = document.createElement('div'); extra.className = 'section-group';
+        extra.innerHTML = '<span class="group-label">Extra</span>';
+        ['🌲', '🍕', '🪐', '🔥', '🎨'].forEach(icon => {
+            let item = document.createElement('div'); item.className = 'cam-item'; 
+            if(icon === '🎨') { item.innerHTML = '🖼️'; item.onclick = () => document.getElementById('file-in').click(); }
+            else { item.innerHTML = icon; item.onclick = () => addDesignerItem(icon); }
+            extra.appendChild(item);
+        });
+        camCat.append(souls, home, extra);
     }
 
-    function addSticker(icon) {
-        const s = document.createElement('div');
-        s.className = 'sticker';
-        s.style.left = '40%'; s.style.top = '40%';
-        s.innerHTML = `<div style="font-size: 8rem;">${icon}</div><div class="sticker-handle">✥</div>`;
-        canvas.appendChild(s);
-        makeDraggable(s);
+    function addDesignerItem(icon) {
+        const obj = document.createElement('div');
+        obj.className = 'ar-object';
+        const off = (Math.random() * 60) - 30;
+        obj.style.left = `calc(50% + ${off}px)`;
+        obj.style.top = `calc(40% + ${off}px)`;
+        obj.style.setProperty('--sc', '1');
+        obj.style.setProperty('--rot', '0deg');
+        obj.style.transform = 'scale(1) rotate(0deg)';
+        obj.innerHTML = `<div style="font-size: 8rem;">${icon}</div><button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
+        overlay.appendChild(obj);
+        attachGestures(obj);
     }
 
-    function makeDraggable(el) {
-        let dragging = false;
-        let sx, sy;
+    function attachGestures(el) {
+        let sx, sy, sd, sa, is, ir;
         el.addEventListener('touchstart', (e) => {
-            dragging = true;
-            sx = e.touches[0].clientX - el.offsetLeft;
-            sy = e.touches[0].clientY - el.offsetTop;
+            if(e.touches.length === 1) {
+                sx = e.touches[0].clientX - el.offsetLeft;
+                sy = e.touches[0].clientY - el.offsetTop;
+            } else if(e.touches.length === 2) {
+                const t1 = e.touches[0], t2 = e.touches[1];
+                sd = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+                sa = Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * 180 / Math.PI;
+                is = parseFloat(el.style.getPropertyValue('--sc')) || 1;
+                ir = parseFloat(el.style.getPropertyValue('--rot')) || 0;
+            }
         });
         window.addEventListener('touchmove', (e) => {
-            if(!dragging) return;
-            el.style.left = (e.touches[0].clientX - sx) + 'px';
-            el.style.top = (e.touches[0].clientY - sy) + 'px';
+            if(e.touches.length === 1) {
+                el.style.left = (e.touches[0].clientX - sx) + 'px';
+                el.style.top = (e.touches[0].clientY - sy) + 'px';
+            } else if(e.touches.length === 2) {
+                const t1 = e.touches[0], t2 = e.touches[1];
+                const d = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+                const a = Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * 180 / Math.PI;
+                el.style.setProperty('--sc', (d / sd) * is);
+                el.style.setProperty('--rot', (ir + (a - sa)) + 'deg');
+            }
+            el.style.transform = `scale(var(--sc)) rotate(var(--rot))`;
         });
-        window.addEventListener('touchend', () => dragging = false);
     }
+
+    function uploadToDesigner(input) {
+        if(input.files[0]) {
+            const r = new FileReader();
+            r.onload = e => {
+                const obj = document.createElement('div'); obj.className = 'ar-object';
+                obj.style.left = '40%'; obj.style.top = '40%';
+                obj.style.setProperty('--sc', '1'); obj.style.setProperty('--rot', '0deg');
+                obj.style.transform = 'scale(1) rotate(0deg)';
+                obj.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:15px;"><button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
+                overlay.appendChild(obj); attachGestures(obj);
+            };
+            r.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function clearAll() { overlay.innerHTML = ''; }
+    function saveDesign() { document.getElementById('flash').style.opacity = '1'; setTimeout(() => document.getElementById('flash').style.opacity = '0', 100); }
 
     setMode('play');
   </script>
