@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>TwistQR | AR Designer Supreme</title>
+  <title>TwistQR | AR Design Supreme 3D</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     :root {
@@ -36,7 +36,7 @@
     model-viewer { width: 100%; height: 100%; }
     
     .btn-launch { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 22px 50px; border-radius: 50px; font-weight: 900; font-size: 1.1rem; letter-spacing: 3px; margin-top: 30px; box-shadow: 0 10px 40px rgba(138,43,226,0.4); cursor: pointer; transition: 0.3s; }
-    .btn-designer { background: rgba(255,255,255,0.15); border: 2px solid white; color: white; padding: 18px 40px; border-radius: 50px; font-weight: 900; font-size: 0.9rem; margin-top: 15px; cursor: pointer; }
+    .btn-designer { background: rgba(255,255,255,0.15); border: 2px solid white; color: white; padding: 18px 40px; border-radius: 50px; font-weight: 900; font-size: 0.9rem; margin-top: 15px; cursor: pointer; width: 300px; }
 
     /* Bottom Scroller Menu */
     #selector-strip { background: rgba(0,0,0,0.6); padding: 25px 0 45px; border-top: 1px solid rgba(255,255,255,0.05); }
@@ -49,32 +49,35 @@
 
     /* Designer Elements */
     .ar-object { 
-      position: absolute; width: 200px; height: 200px; pointer-events: auto; touch-action: none; 
+      position: absolute; width: 280px; height: 280px; pointer-events: auto; touch-action: none; 
       filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
       display: flex; align-items: center; justify-content: center;
       z-index: 1002;
     }
-    .delete-btn { position: absolute; top: -15px; right: -15px; background: var(--danger); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: 900; font-size: 18px; box-shadow: 0 0 10px rgba(255,0,0,0.5); z-index: 2010; cursor: pointer; }
+    .delete-btn { position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: 900; font-size: 18px; box-shadow: 0 0 10px rgba(255,0,0,0.5); z-index: 2010; cursor: pointer; }
 
     /* In-Camera Catalog */
     #cam-catalog { 
       position: absolute; bottom: 120px; left: 0; width: 100vw; height: 140px; 
       display: flex; gap: 12px; overflow-x: auto; padding: 20px 30px; 
       pointer-events: auto; z-index: 1005; backdrop-filter: blur(30px);
-      background: rgba(0,0,0,0.8); border-top: 2px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.85); border-top: 2px solid rgba(255,255,255,0.1);
       align-items: center; scrollbar-width: none;
     }
     .section-group { display: flex; gap: 12px; padding-right: 25px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 15px; align-items: center; height: 100%; }
     .section-group:last-child { border-right: none; }
     .group-label { writing-mode: vertical-lr; font-size: 0.5rem; color: #555; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
 
-    .cam-item { flex: 0 0 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2.22rem; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+    .cam-item { flex: 0 0 85px; height: 85px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; }
     .cam-item:active { transform: scale(0.9); background: rgba(0,245,255,0.2); }
+    .cam-item span { font-size: 2.2rem; }
+    .cam-label { font-size: 0.45rem; font-weight: 900; margin-top: 3px; color: #555; text-transform: uppercase; }
 
     .ar-controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; gap: 15px; pointer-events: auto; z-index: 1005; }
     .ar-btn { background: rgba(0,0,0,0.85); border: 2px solid white; color: white; padding: 15px 30px; border-radius: 50px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; cursor: pointer; }
     
     #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; opacity: 0; pointer-events: none; }
+    #engine-msg { position: absolute; top: 110px; width: 100%; text-align: center; color: #888; font-size: 0.6rem; letter-spacing: 2px; font-weight: 900; font-size: 0.6rem; z-index: 1001; }
   </style>
 </head>
 <body>
@@ -97,9 +100,9 @@
             <button slot="ar-button" id="real-ar-btn" style="display:none;"></button>
         </model-viewer>
       </div>
-      <button class="btn-launch" onclick="document.getElementById('real-ar-btn').click()">🚀 LAUNCH REAL AR (One Item)</button>
-      <button class="btn-designer" onclick="enterDesigner()">🛠️ START MULTI-DESIGNER</button>
-      <p style="margin-top:15px; color:#444; font-size:0.6rem; letter-spacing:1px; font-weight:900;">REAL AR = Perfect movement | DESIGNER = Many items</p>
+      <button class="btn-launch" onclick="document.getElementById('real-ar-btn').click()">🚀 LAUNCH REAL 3D (Single)</button>
+      <button class="btn-designer" onclick="enterDesigner()">🛠️ START 3D DESIGNER (Multi)</button>
+      <p style="margin-top:15px; color:#444; font-size:0.65rem; letter-spacing:1px; font-weight:900;">REAL = Perfect Movement | DESIGNER = Infinite Items</p>
     </div>
 
     <div id="selector-strip"><div id="scroller" class="scroller"></div></div>
@@ -108,10 +111,11 @@
   <div id="ar-camera-view">
     <video id="v-feed" autoplay playsinline></video>
     <div id="ar-overlay"></div>
+    <div id="engine-msg">3D MULTI-DESIGN CANVAS ACTIVE</div>
     <div id="cam-catalog"></div>
     <div class="ar-controls">
         <button class="ar-btn" onclick="clearAll()" style="color:var(--danger); border-color:var(--danger);">RESET</button>
-        <button class="ar-btn" onclick="exitDesigner()" style="background:var(--danger);">✕ EXIT</button>
+        <button class="ar-btn" onclick="exitDesigner()" style="background:var(--danger);">✕ EXIT HUB</button>
         <button class="ar-btn" onclick="saveDesign()">SNAP</button>
     </div>
     <input type="file" id="file-in" style="display:none" onchange="uploadToDesigner(this)">
@@ -127,18 +131,26 @@
     
     let currentMode = 'play';
 
-    const catalog = {
-      play: [
+    const library = {
+      souls: [
         { name: 'Astro', icon: '🧑‍🚀', src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb' },
         { name: 'Robot', icon: '🤖', src: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb' },
         { name: 'Fox', icon: '🦊', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb' },
-        { name: 'Duck', icon: '🦆', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb' }
+        { name: 'Duck', icon: '🦆', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb' },
+        { name: 'Fish', icon: '🐟', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb' }
       ],
-      work: [
+      home: [
         { name: 'Couch', icon: '🛋️', src: 'https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb' },
         { name: 'Chair', icon: '🪑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb' },
+        { name: 'Music', icon: '📻', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb' },
         { name: 'Lamp', icon: '🏮', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb' },
-        { name: 'Music', icon: '📻', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb' }
+        { name: 'Camera', icon: '📷', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/AntiqueCamera/glTF-Binary/AntiqueCamera.glb' }
+      ],
+      extras: [
+        { name: 'Package', icon: '📦', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb' },
+        { name: 'Helmet', icon: '⛑️', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb' },
+        { name: 'Avocado', icon: '🥑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb' },
+        { name: 'Upload', icon: '🖼️', src: 'UPLOAD' }
       ]
     };
 
@@ -152,7 +164,8 @@
     function renderScroller() {
         const scroller = document.getElementById('scroller');
         scroller.innerHTML = '';
-        catalog[currentMode].forEach(item => {
+        const list = currentMode === 'play' ? library.souls : library.home;
+        list.forEach(item => {
             let card = document.createElement('div');
             card.className = 'char-card';
             card.innerHTML = `<span class="icon">${item.icon}</span>`;
@@ -185,42 +198,44 @@
 
     function renderCamCatalog() {
         camCat.innerHTML = '';
-        // Group 1: Souls
-        let souls = document.createElement('div'); souls.className = 'section-group';
-        souls.innerHTML = '<span class="group-label">Souls</span>';
-        ['🧑‍🚀', '🤖', '🦊', '🦆', '🐉', '👻'].forEach(icon => {
-            let item = document.createElement('div'); item.className = 'cam-item'; item.innerHTML = icon;
-            item.onclick = () => addDesignerItem(icon); souls.appendChild(item);
+        Object.entries(library).forEach(([key, items]) => {
+            let group = document.createElement('div');
+            group.className = 'section-group';
+            group.innerHTML = `<span class="group-label">${key}</span>`;
+            items.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'cam-item';
+                div.innerHTML = `<span>${item.icon}</span><span class="cam-label">${item.name}</span>`;
+                div.onclick = () => {
+                    if(item.src === 'UPLOAD') document.getElementById('file-in').click();
+                    else addDesignerItem(item.src);
+                };
+                group.appendChild(div);
+            });
+            camCat.appendChild(group);
         });
-        // Group 2: Home
-        let home = document.createElement('div'); home.className = 'section-group';
-        home.innerHTML = '<span class="group-label">Home</span>';
-        ['🛋️', '🪑', '🛏️', '🖥️', '📺', '🎹'].forEach(icon => {
-            let item = document.createElement('div'); item.className = 'cam-item'; item.innerHTML = icon;
-            item.onclick = () => addDesignerItem(icon); home.appendChild(item);
-        });
-        // Group 3: Extra
-        let extra = document.createElement('div'); extra.className = 'section-group';
-        extra.innerHTML = '<span class="group-label">Extra</span>';
-        ['🌲', '🍕', '🪐', '🔥', '🎨'].forEach(icon => {
-            let item = document.createElement('div'); item.className = 'cam-item'; 
-            if(icon === '🎨') { item.innerHTML = '🖼️'; item.onclick = () => document.getElementById('file-in').click(); }
-            else { item.innerHTML = icon; item.onclick = () => addDesignerItem(icon); }
-            extra.appendChild(item);
-        });
-        camCat.append(souls, home, extra);
     }
 
-    function addDesignerItem(icon) {
+    function addDesignerItem(src) {
         const obj = document.createElement('div');
         obj.className = 'ar-object';
-        const off = (Math.random() * 60) - 30;
-        obj.style.left = `calc(50% + ${off}px)`;
-        obj.style.top = `calc(40% + ${off}px)`;
+        const off = (Math.random() * 80) - 40;
+        obj.style.left = `calc(50% - 140px + ${off}px)`;
+        obj.style.top = `calc(40% - 140px + ${off}px)`;
         obj.style.setProperty('--sc', '1');
         obj.style.setProperty('--rot', '0deg');
-        obj.style.transform = 'scale(1) rotate(0deg)';
-        obj.innerHTML = `<div style="font-size: 8rem;">${icon}</div><button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
+        
+        const mv = document.createElement('model-viewer');
+        mv.src = src;
+        mv.style.width = '100%';
+        mv.style.height = '100%';
+        mv.setAttribute('auto-rotate', '');
+        mv.setAttribute('shadow-intensity', '1');
+        mv.setAttribute('camera-controls', 'none'); 
+        mv.setAttribute('touch-action', 'none');
+        
+        obj.appendChild(mv);
+        obj.innerHTML += `<button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
         overlay.appendChild(obj);
         attachGestures(obj);
     }
@@ -228,6 +243,7 @@
     function attachGestures(el) {
         let sx, sy, sd, sa, is, ir;
         el.addEventListener('touchstart', (e) => {
+            if(e.target.tagName === 'BUTTON') return;
             if(e.touches.length === 1) {
                 sx = e.touches[0].clientX - el.offsetLeft;
                 sy = e.touches[0].clientY - el.offsetTop;
@@ -258,10 +274,10 @@
         if(input.files[0]) {
             const r = new FileReader();
             r.onload = e => {
-                const obj = document.createElement('div'); obj.className = 'ar-object';
+                const obj = document.createElement('div');
+                obj.className = 'ar-object';
                 obj.style.left = '40%'; obj.style.top = '40%';
                 obj.style.setProperty('--sc', '1'); obj.style.setProperty('--rot', '0deg');
-                obj.style.transform = 'scale(1) rotate(0deg)';
                 obj.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:15px;"><button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
                 overlay.appendChild(obj); attachGestures(obj);
             };
