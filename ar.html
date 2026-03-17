@@ -288,6 +288,7 @@
         let initialScale = 1;
         let initialRot = 0;
         let startDist = 0;
+        let startAngle = 0;
         
         el.addEventListener('touchstart', (e) => {
             selectObject(el);
@@ -296,11 +297,12 @@
                 startX = e.touches[0].clientX - el.offsetLeft;
                 startY = e.touches[0].clientY - el.offsetTop;
             } else if (e.touches.length === 2) {
-                startDist = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
+                const t1 = e.touches[0];
+                const t2 = e.touches[1];
+                startDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+                startAngle = Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * 180 / Math.PI;
                 initialScale = parseFloat(el.style.getPropertyValue('--sc')) || 1;
+                initialRot = parseFloat(el.style.getPropertyValue('--rot')) || 0;
             }
         });
 
@@ -308,47 +310,24 @@
             if (selectedItem !== el) return;
             
             if (e.touches.length === 1) {
-                // One finger: DRAG if it moves, but we want ROTATE too?
-                // User said: one finger to ROTATE, but usually one finger moves.
-                // Let's do: Hold and drag to MOVE. 
-                // Wait, user said "one finger to rotate it". 
-                // Let's make it so if you drag the SIDES it rotates, or if you rotate with a swipe.
-                // Most intuitive for "one finger rotate" is horizontal swipe.
-                
-                // Let's implement: Drag to move, but if you swipe horizontally at the bottom it rotates?
-                // Or let's just use horizontal movement for rotation if a modifier is met?
-                // Actually, let's just do: One finger drag = MOVE, but add a rotate button? 
-                // No, user specifically asked for "one finger to rotate it".
-                // Let's make it so horizontal swipe = rotate, vertical swipe = move? 
-                // That's confusing. Let's do: 
-                // Two fingers = PINCH (Size)
-                // One finger = DRAG MOVE
-                // Wait, user said: "one finger to rotate it".
-                // Okay, let's do: One finger = ROTATE. Two fingers = SCALE.
-                // How to move? Maybe double tap to move?
-                // Let's stick to: One finger = MOVE + ROTATE (Drag to move, but if moving slowly horizontally it rotates).
-                // Better: Drag = MOVE. Long Press = ROTATE.
-                // EVEN BETTER: Let's follow "one finger rotate" by mapping horizontal movement to rotation.
-                
-                const currentRot = parseFloat(el.style.getPropertyValue('--rot')) || 0;
-                const dx = e.touches[0].clientX - (startX + el.offsetLeft);
-                
-                // Move logic
+                // CLASSIC MOVE: Just drag with one finger
                 el.style.left = (e.touches[0].clientX - startX) + 'px';
                 el.style.top = (e.touches[0].clientY - startY) + 'px';
-                
-                // Rotate logic (if moving horizontally)
-                const rotAmount = dx * 0.5; 
-                el.style.setProperty('--rot', (currentRot + rotAmount) + 'deg');
-                
             } else if (e.touches.length === 2) {
-                const currentDist = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
+                // CLASSIC TRANSFORM: Two fingers to scale and rotate
+                const t1 = e.touches[0];
+                const t2 = e.touches[1];
+                
+                // Scale
+                const currentDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
                 const scale = (currentDist / startDist) * initialScale;
-                const finalScale = Math.min(Math.max(scale, 0.3), 5);
+                const finalScale = Math.min(Math.max(scale, 0.2), 6);
                 el.style.setProperty('--sc', finalScale);
+                
+                // Rotate
+                const currentAngle = Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * 180 / Math.PI;
+                const deltaRot = currentAngle - startAngle;
+                el.style.setProperty('--rot', (initialRot + deltaRot) + 'deg');
             }
             
             el.style.transform = `scale(var(--sc)) rotate(var(--rot))`;
