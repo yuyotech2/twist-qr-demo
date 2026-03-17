@@ -2,8 +2,8 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>TwistQR | AR Design Supreme 3D</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <title>TwistQR | AR Designer Supreme 3D</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer@latest/dist/model-viewer.min.js"></script>
   <style>
     :root {
       --primary: #00f5ff;
@@ -13,13 +13,13 @@
       --bg: #050508;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Outfit', sans-serif; }
-    body { background: var(--bg); color: white; height: 100vh; overflow: hidden; }
+    body { background: var(--bg); color: white; height: 100vh; overflow: hidden; touch-action: none; }
 
     /* UI Containers */
     #main-menu { position: relative; height: 100vh; display: flex; flex-direction: column; z-index: 10; background: var(--bg); transition: 0.5s; }
     #ar-camera-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000; background: #000; display: none; }
     #v-feed { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-    #ar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
+    #ar-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
 
     /* Header */
     #header { padding: 15px; border-bottom: 2px solid var(--primary); text-align: center; background: rgba(0,0,0,0.9); }
@@ -35,8 +35,8 @@
     .preview-box { width: 280px; height: 280px; border-radius: 50px; border: 2px solid rgba(138,43,226,0.3); position: relative; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(138,43,226,0.1) 0%, transparent 70%); }
     model-viewer { width: 100%; height: 100%; }
     
-    .btn-launch { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 22px 50px; border-radius: 50px; font-weight: 900; font-size: 1.1rem; letter-spacing: 3px; margin-top: 30px; box-shadow: 0 10px 40px rgba(138,43,226,0.4); cursor: pointer; transition: 0.3s; }
-    .btn-designer { background: rgba(255,255,255,0.15); border: 2px solid white; color: white; padding: 18px 40px; border-radius: 50px; font-weight: 900; font-size: 0.9rem; margin-top: 15px; cursor: pointer; width: 300px; }
+    .btn-launch { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 22px 50px; border-radius: 50px; font-weight: 900; font-size: 1.1rem; letter-spacing: 3px; margin-top: 30px; box-shadow: 0 10px 40px rgba(138,43,226,0.4); cursor: pointer; transition: 0.3s; width: 320px; }
+    .btn-designer { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 15px 40px; border-radius: 50px; font-weight: 900; font-size: 0.8rem; margin-top: 15px; cursor: pointer; width: 300px; }
 
     /* Bottom Scroller Menu */
     #selector-strip { background: rgba(0,0,0,0.6); padding: 25px 0 45px; border-top: 1px solid rgba(255,255,255,0.05); }
@@ -47,42 +47,57 @@
     .char-card.active.work { border-color: var(--work-accent); background: rgba(76,175,80,0.1); }
     .char-card .icon { font-size: 2rem; }
 
-    /* Designer Elements */
-    .ar-object { 
-      position: absolute; width: 280px; height: 280px; pointer-events: auto; touch-action: none; 
-      filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1002;
+    /* Multi-Designer Elements */
+    .ar-sticker {
+        position: absolute; width: 240px; height: 240px; pointer-events: auto; touch-action: none;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 1002;
     }
-    .delete-btn { position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; border: none; width: 35px; height: 35px; border-radius: 50%; font-weight: 900; font-size: 18px; box-shadow: 0 0 10px rgba(255,0,0,0.5); z-index: 2010; cursor: pointer; }
+    .sticker-mv { width: 100%; height: 100%; pointer-events: auto; }
+    .move-btn {
+        position: absolute; bottom: 0px; left: 50%; transform: translateX(-50%);
+        background: var(--primary); color: #000; width: 44px; height: 44px;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 1.4rem; box-shadow: 0 4px 15px rgba(0,245,255,0.5);
+        z-index: 1010; cursor: pointer; border: 2px solid #000;
+    }
+    .del-btn {
+        position: absolute; top: 0px; right: 0px;
+        background: var(--danger); color: white; width: 32px; height: 32px;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-weight: 900; z-index: 1010; cursor: pointer; border: 2px solid #000;
+    }
 
-    /* In-Camera Catalog */
+    /* Catalog in Camera */
     #cam-catalog { 
-      position: absolute; bottom: 120px; left: 0; width: 100vw; height: 140px; 
+      position: absolute; bottom: 120px; left: 0; width: 100vw; height: 130px; 
       display: flex; gap: 12px; overflow-x: auto; padding: 20px 30px; 
-      pointer-events: auto; z-index: 1005; backdrop-filter: blur(30px);
+      pointer-events: auto; z-index: 1005; backdrop-filter: blur(25px);
       background: rgba(0,0,0,0.85); border-top: 2px solid rgba(255,255,255,0.1);
       align-items: center; scrollbar-width: none;
     }
-    .section-group { display: flex; gap: 12px; padding-right: 25px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 15px; align-items: center; height: 100%; }
-    .section-group:last-child { border-right: none; }
-    .group-label { writing-mode: vertical-lr; font-size: 0.5rem; color: #555; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+    .cat-group { display: flex; gap: 12px; padding-right: 25px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 15px; align-items: center; height: 100%; }
+    .cat-group:last-child { border-right: none; }
+    .cat-label { writing-mode: vertical-lr; font-size: 0.5rem; color: #555; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
 
-    .cam-item { flex: 0 0 85px; height: 85px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; }
-    .cam-item:active { transform: scale(0.9); background: rgba(0,245,255,0.2); }
-    .cam-item span { font-size: 2.2rem; }
-    .cam-label { font-size: 0.45rem; font-weight: 900; margin-top: 3px; color: #555; text-transform: uppercase; }
+    .cat-item { flex: 0 0 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+    .cat-item:active { transform: scale(0.9); background: rgba(0,245,255,0.2); }
+    .cat-item span { font-size: 2rem; }
+    .cat-sub { font-size: 0.4rem; color: #666; font-weight: 900; text-transform: uppercase; margin-top: 2px; }
 
-    .ar-controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; gap: 15px; pointer-events: auto; z-index: 1005; }
-    .ar-btn { background: rgba(0,0,0,0.85); border: 2px solid white; color: white; padding: 15px 30px; border-radius: 50px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; cursor: pointer; }
+    .ar-ui { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; gap: 15px; pointer-events: auto; z-index: 1005; }
+    .ui-btn { background: rgba(0,0,0,0.85); border: 2px solid white; color: white; padding: 14px 28px; border-radius: 50px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; cursor: pointer; }
     
-    #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; opacity: 0; pointer-events: none; }
-    #engine-msg { position: absolute; top: 110px; width: 100%; text-align: center; color: #888; font-size: 0.6rem; letter-spacing: 2px; font-weight: 900; font-size: 0.6rem; z-index: 1001; }
+    #engine-msg { position: absolute; top: 110px; width: 100%; text-align: center; color: #666; font-size: 0.6rem; letter-spacing: 2px; font-weight: 900; z-index: 1001; text-transform: uppercase; }
+    #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; opacity: 0; pointer-events: none; transition: opacity 0.1s; }
+    
+    #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: black; padding: 10px 20px; border-radius: 50px; font-weight: 900; font-size: 0.7rem; z-index: 9000; display: none; }
   </style>
 </head>
 <body>
 
   <div id="flash"></div>
+  <div id="toast">SAVED!</div>
 
   <div id="main-menu">
     <header id="header">
@@ -100,9 +115,9 @@
             <button slot="ar-button" id="real-ar-btn" style="display:none;"></button>
         </model-viewer>
       </div>
-      <button class="btn-launch" onclick="document.getElementById('real-ar-btn').click()">🚀 LAUNCH REAL 3D (Single)</button>
-      <button class="btn-designer" onclick="enterDesigner()">🛠️ START 3D DESIGNER (Multi)</button>
-      <p style="margin-top:15px; color:#444; font-size:0.65rem; letter-spacing:1px; font-weight:900;">REAL = Perfect Movement | DESIGNER = Infinite Items</p>
+      <button class="btn-launch" onclick="launchNative()">🚀 LAUNCH REAL AR</button>
+      <button class="btn-designer" onclick="enterDesigner()">🛠️ START MULTI-DESIGNER</button>
+      <p style="margin-top:15px; color:#444; font-size:0.65rem; letter-spacing:1px; font-weight:900;">REAL AR = Sticks to floor | DESIGNER = Infinite items</p>
     </div>
 
     <div id="selector-strip"><div id="scroller" class="scroller"></div></div>
@@ -110,13 +125,13 @@
 
   <div id="ar-camera-view">
     <video id="v-feed" autoplay playsinline></video>
-    <div id="ar-overlay"></div>
+    <div id="ar-canvas"></div>
     <div id="engine-msg">3D MULTI-DESIGN CANVAS ACTIVE</div>
     <div id="cam-catalog"></div>
-    <div class="ar-controls">
-        <button class="ar-btn" onclick="clearAll()" style="color:var(--danger); border-color:var(--danger);">RESET</button>
-        <button class="ar-btn" onclick="exitDesigner()" style="background:var(--danger);">✕ EXIT HUB</button>
-        <button class="ar-btn" onclick="saveDesign()">SNAP</button>
+    <div class="ar-ui">
+        <button class="ui-btn" onclick="clearAll()" style="color:var(--danger); border-color:var(--danger);">RESET</button>
+        <button class="ui-btn" onclick="exitDesigner()" style="background:var(--danger); border:none;">✕ EXIT</button>
+        <button class="ui-btn" onclick="saveDesign()">SNAP</button>
     </div>
     <input type="file" id="file-in" style="display:none" onchange="uploadToDesigner(this)">
   </div>
@@ -124,12 +139,13 @@
   <script>
     const menu = document.getElementById('main-menu');
     const designer = document.getElementById('ar-camera-view');
-    const overlay = document.getElementById('ar-overlay');
+    const canvas = document.getElementById('ar-canvas');
     const vFeed = document.getElementById('v-feed');
     const camCat = document.getElementById('cam-catalog');
     const mainMv = document.getElementById('main-view');
+    const toast = document.getElementById('toast');
     
-    let currentMode = 'play';
+    let currentZ = 1002;
 
     const library = {
       souls: [
@@ -144,15 +160,17 @@
         { name: 'Chair', icon: '🪑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb' },
         { name: 'Music', icon: '📻', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb' },
         { name: 'Lamp', icon: '🏮', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb' },
-        { name: 'Camera', icon: '📷', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/AntiqueCamera/glTF-Binary/AntiqueCamera.glb' }
+        { name: 'Antique', icon: '📷', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/AntiqueCamera/glTF-Binary/AntiqueCamera.glb' }
       ],
       extras: [
-        { name: 'Package', icon: '📦', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb' },
-        { name: 'Helmet', icon: '⛑️', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb' },
         { name: 'Avocado', icon: '🥑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb' },
+        { name: 'Helmet', icon: '⛑️', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb' },
+        { name: 'Box', icon: '📦', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb' },
         { name: 'Upload', icon: '🖼️', src: 'UPLOAD' }
       ]
     };
+
+    let currentMode = 'play';
 
     function setMode(mode) {
         currentMode = mode;
@@ -179,6 +197,10 @@
         if(scroller.firstChild) scroller.firstChild.click();
     }
 
+    function launchNative() {
+        if(document.getElementById('real-ar-btn')) document.getElementById('real-ar-btn').click();
+    }
+
     async function enterDesigner() {
         menu.style.display = 'none';
         designer.style.display = 'block';
@@ -193,22 +215,22 @@
         menu.style.display = 'flex';
         designer.style.display = 'none';
         if(vFeed.srcObject) vFeed.srcObject.getTracks().forEach(t => t.stop());
-        overlay.innerHTML = '';
+        canvas.innerHTML = '';
     }
 
     function renderCamCatalog() {
         camCat.innerHTML = '';
         Object.entries(library).forEach(([key, items]) => {
             let group = document.createElement('div');
-            group.className = 'section-group';
-            group.innerHTML = `<span class="group-label">${key}</span>`;
+            group.className = 'cat-group';
+            group.innerHTML = `<span class="cat-label">${key}</span>`;
             items.forEach(item => {
                 let div = document.createElement('div');
-                div.className = 'cam-item';
-                div.innerHTML = `<span>${item.icon}</span><span class="cam-label">${item.name}</span>`;
+                div.className = 'cat-item';
+                div.innerHTML = `<span>${item.icon}</span><span class="cat-sub">${item.name}</span>`;
                 div.onclick = () => {
                     if(item.src === 'UPLOAD') document.getElementById('file-in').click();
-                    else addDesignerItem(item.src);
+                    else addItem(item.src);
                 };
                 group.appendChild(div);
             });
@@ -216,89 +238,93 @@
         });
     }
 
-    function addDesignerItem(src) {
-        const obj = document.createElement('div');
-        obj.className = 'ar-object';
-        const off = (Math.random() * 80) - 40;
-        obj.style.left = `calc(50% - 140px + ${off}px)`;
-        obj.style.top = `calc(40% - 140px + ${off}px)`;
-        
-        // Ensure scale and rotation are initialized
-        obj.style.setProperty('--sc', '1');
-        obj.style.setProperty('--rot', '0deg');
-        obj.style.transform = 'scale(var(--sc)) rotate(var(--rot))';
-        
+    function addItem(src) {
+        const s = document.createElement('div');
+        s.className = 'ar-sticker';
+        const off = (Math.random() * 60) - 30;
+        s.style.left = `calc(50% - 120px + ${off}px)`;
+        s.style.top = `calc(40% - 120px + ${off}px)`;
+        s.style.zIndex = ++currentZ;
+
         const mv = document.createElement('model-viewer');
+        mv.className = 'sticker-mv';
         mv.src = src;
-        mv.style.width = '100%';
-        mv.style.height = '100%';
         mv.setAttribute('auto-rotate', '');
         mv.setAttribute('shadow-intensity', '1');
-        mv.setAttribute('exposure', '1');
-        mv.setAttribute('camera-controls', 'none'); 
-        mv.setAttribute('touch-action', 'none');
+        mv.setAttribute('camera-controls', 'true');
+        mv.setAttribute('touch-action', 'pan-y');
+        mv.setAttribute('loading', 'lazy');
         
-        const btn = document.createElement('button');
-        btn.className = 'delete-btn';
-        btn.innerHTML = '✕';
-        btn.onclick = (e) => { 
-            e.stopPropagation(); 
-            obj.remove(); 
-        };
+        const moveBtn = document.createElement('div');
+        moveBtn.className = 'move-btn';
+        moveBtn.innerHTML = '✥';
+        
+        const delBtn = document.createElement('div');
+        delBtn.className = 'del-btn';
+        delBtn.innerHTML = '✕';
+        delBtn.onclick = (e) => { e.stopPropagation(); s.remove(); };
 
-        obj.appendChild(mv);
-        obj.appendChild(btn);
-        overlay.appendChild(obj);
-        attachGestures(obj);
+        s.appendChild(mv);
+        s.appendChild(moveBtn);
+        s.appendChild(delBtn);
+        canvas.appendChild(s);
+        makeDraggable(s, moveBtn);
     }
 
-    function attachGestures(el) {
-        let sx, sy, sd, sa, is, ir;
-        el.addEventListener('touchstart', (e) => {
-            if(e.target.tagName === 'BUTTON') return;
-            if(e.touches.length === 1) {
-                sx = e.touches[0].clientX - el.offsetLeft;
-                sy = e.touches[0].clientY - el.offsetTop;
-            } else if(e.touches.length === 2) {
-                const t1 = e.touches[0], t2 = e.touches[1];
-                sd = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-                sa = Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * 180 / Math.PI;
-                is = parseFloat(el.style.getPropertyValue('--sc')) || 1;
-                ir = parseFloat(el.style.getPropertyValue('--rot')) || 0;
-            }
+    function makeDraggable(el, handle) {
+        let dragging = false;
+        let sx, sy;
+        
+        handle.addEventListener('touchstart', (e) => {
+            dragging = true;
+            el.style.zIndex = ++currentZ;
+            sx = e.touches[0].clientX - el.offsetLeft;
+            sy = e.touches[0].clientY - el.offsetTop;
+            e.preventDefault();
+            e.stopPropagation();
         });
+
         window.addEventListener('touchmove', (e) => {
-            if(e.touches.length === 1) {
-                el.style.left = (e.touches[0].clientX - sx) + 'px';
-                el.style.top = (e.touches[0].clientY - sy) + 'px';
-            } else if(e.touches.length === 2) {
-                const t1 = e.touches[0], t2 = e.touches[1];
-                const d = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-                const a = Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * 180 / Math.PI;
-                el.style.setProperty('--sc', (d / sd) * is);
-                el.style.setProperty('--rot', (ir + (a - sa)) + 'deg');
-            }
-            el.style.transform = `scale(var(--sc)) rotate(var(--rot))`;
-        });
+            if(!dragging) return;
+            el.style.left = (e.touches[0].clientX - sx) + 'px';
+            el.style.top = (e.touches[0].clientY - sy) + 'px';
+            e.preventDefault();
+        }, { passive: false });
+
+        window.addEventListener('touchend', () => { dragging = false; });
     }
 
     function uploadToDesigner(input) {
         if(input.files[0]) {
             const r = new FileReader();
             r.onload = e => {
-                const obj = document.createElement('div');
-                obj.className = 'ar-object';
-                obj.style.left = '40%'; obj.style.top = '40%';
-                obj.style.setProperty('--sc', '1'); obj.style.setProperty('--rot', '0deg');
-                obj.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:15px;"><button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
-                overlay.appendChild(obj); attachGestures(obj);
+                const s = document.createElement('div');
+                s.className = 'ar-sticker';
+                s.style.left = '40%'; s.style.top = '40%';
+                s.style.zIndex = ++currentZ;
+                s.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:15px; filter: drop-shadow(0 0 10px white);">`;
+                const moveBtn = document.createElement('div');
+                moveBtn.className = 'move-btn';
+                moveBtn.innerHTML = '✥';
+                const delBtn = document.createElement('div');
+                delBtn.className = 'del-btn';
+                delBtn.innerHTML = '✕';
+                delBtn.onclick = () => s.remove();
+                s.append(moveBtn, delBtn);
+                canvas.appendChild(s);
+                makeDraggable(s, moveBtn);
             };
             r.readAsDataURL(input.files[0]);
         }
     }
 
-    function clearAll() { overlay.innerHTML = ''; }
-    function saveDesign() { document.getElementById('flash').style.opacity = '1'; setTimeout(() => document.getElementById('flash').style.opacity = '0', 100); }
+    function clearAll() { canvas.innerHTML = ''; }
+    function saveDesign() { 
+        document.getElementById('flash').style.opacity = '1'; 
+        setTimeout(() => document.getElementById('flash').style.opacity = '0', 200);
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 1500);
+    }
 
     setMode('play');
   </script>
