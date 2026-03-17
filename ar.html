@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>TwistQR | AR Design Supreme 3D</title>
+  <title>TwistQR | AR Designer Pro 3D</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     :root {
@@ -34,7 +34,8 @@
     .preview-box { width: 280px; height: 280px; border-radius: 50px; border: 2px solid rgba(138,43,226,0.3); position: relative; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(138,43,226,0.1) 0%, transparent 70%); }
     model-viewer { width: 100%; height: 100%; }
     
-    .btn-launch { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 18px 60px; border-radius: 50px; font-weight: 900; font-size: 1.1rem; letter-spacing: 3px; margin-top: 40px; box-shadow: 0 10px 40px rgba(138,43,226,0.4); cursor: pointer; transition: 0.3s; }
+    .btn-launch { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 18px 40px; border-radius: 50px; font-weight: 900; font-size: 1rem; letter-spacing: 2px; margin-top: 20px; box-shadow: 0 10px 40px rgba(138,43,226,0.4); cursor: pointer; transition: 0.3s; width: 300px; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px 30px; border-radius: 50px; font-weight: 900; font-size: 0.7rem; margin-top: 10px; cursor: pointer; }
 
     /* Bottom Scroller Menu */
     #selector-strip { background: rgba(0,0,0,0.6); padding: 25px 0 45px; border-top: 1px solid rgba(255,255,255,0.05); }
@@ -49,16 +50,25 @@
     #ar-canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
     
     .ar-object { 
-      position: absolute; width: 220px; height: 220px; pointer-events: auto; touch-action: none; 
-      filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
+      position: absolute; width: 280px; height: 280px; pointer-events: auto; touch-action: none; 
       display: flex; align-items: center; justify-content: center;
-      transition: border 0.2s;
-      animation: spawn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: none;
+      z-index: 1002;
     }
-    @keyframes spawn { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 100% { transform: scale(var(--sc, 1)) rotate(var(--rot, 0deg)); opacity: 1; } }
     
-    .ar-object.selected { z-index: 2000 !important; }
-    .delete-btn { display: none; }
+    .move-handle {
+        position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+        background: var(--primary); color: #000; width: 48px; height: 48px; 
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; font-weight: bold; z-index: 2000; box-shadow: 0 4px 15px rgba(0,245,255,0.5);
+        cursor: grab; pointer-events: auto;
+    }
+    .delete-handle {
+        position: absolute; top: -10px; right: -10px;
+        background: var(--danger); color: white; width: 35px; height: 35px; 
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem; font-weight: 900; z-index: 2000; pointer-events: auto;
+    }
 
     /* Massive Catalog */
     #in-cam-selector { 
@@ -81,9 +91,6 @@
     
     #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; opacity: 0; pointer-events: none; }
     #status-msg { position: absolute; top: 80px; width: 100%; text-align: center; color: var(--primary); font-weight: 900; letter-spacing: 3px; text-shadow: 0 2px 15px black; pointer-events: none; z-index: 1001; }
-    
-    /* Gestures Tip */
-    #gestures-tip { position: absolute; top: 120px; right: 20px; width: 100px; text-align: right; color: var(--primary); font-size: 0.6rem; font-weight: 900; pointer-events: none; text-transform: uppercase; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -93,7 +100,7 @@
   <div id="main-menu">
     <header id="header">
       <button onclick="window.location.href='index.html'" style="position:absolute; left:18px; top:12px; background:none; border:none; color:#444; font-size:1.5rem;">✕</button>
-      <h1>TWIST DESIGN SUPREME 3D</h1>
+      <h1>TWIST AR DESIGNER 3D</h1>
       <div class="mode-toggle">
         <button id="mode-play" class="mode-btn active play" onclick="setMode('play')">SOULS</button>
         <button id="mode-work" class="mode-btn" onclick="setMode('work')">WORK</button>
@@ -102,9 +109,12 @@
 
     <div id="preview-container">
       <div class="preview-box">
-        <model-viewer id="main-view" src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" ar ar-modes="webxr" camera-controls auto-rotate shadow-intensity="1"></model-viewer>
+        <model-viewer id="main-view" src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls auto-rotate shadow-intensity="1">
+            <button slot="ar-button" id="real-ar-btn" style="display:none;"></button>
+        </model-viewer>
       </div>
-      <button class="btn-launch" onclick="enterAR()">🚀 LAUNCH 3D WORLD</button>
+      <button class="btn-launch" onclick="enterAR()">🚀 LAUNCH 3D DESIGNER</button>
+      <button class="btn-secondary" onclick="document.getElementById('real-ar-btn').click()">📽️ VIEW NATIVE (SINGLE ITEM)</button>
     </div>
 
     <div id="selector-strip"><div id="scroller" class="scroller"></div></div>
@@ -113,57 +123,37 @@
   <div id="ar-camera-view">
     <video id="v-feed" autoplay playsinline></video>
     <div id="ar-canvas-layer"></div>
-    <div id="status-msg">GGESTURE ENGINE ACTIVE</div>
-    <div id="gestures-tip">↔ DRAG MOVE<br>↺ ONE FINGER ROTATE<br>⤢ TWO FINGER PINCH SIZE</div>
+    <div id="status-msg">3D MULTI-ENGINE ACTIVE</div>
 
-    <!-- FULL SUPREME CATALOG -->
     <div id="in-cam-selector">
         
-        <!-- SOULS SECTION -->
+        <!-- SOULS SECTION (ALL 3D) -->
         <div class="catalog-section">
           <span class="section-label">Souls</span>
-          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/Astronaut.glb', 'ASTRO')"><span>🧑‍🚀</span><span class="cam-label">Astro</span></div>
-          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', 'ROBOT')"><span>🤖</span><span class="cam-label">Robot</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb', 'FOX')"><span>🦊</span><span class="cam-label">Fox</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb', 'DUCK')"><span>🦆</span><span class="cam-label">Duck</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🐉', 'DRAGON')"><span>🐉</span><span class="cam-label">Dragon</span></div>
-          <div class="cam-item" onclick="addItem('emoji:👻', 'GHOST')"><span>👻</span><span class="cam-label">Ghost</span></div>
-          <div class="cam-item" onclick="addItem('emoji:👽', 'ALIEN')"><span>👽</span><span class="cam-label">Alien</span></div>
+          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/Astronaut.glb')"><span>🧑‍🚀</span><span class="cam-label">Astro</span></div>
+          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb')"><span>🤖</span><span class="cam-label">Robot</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb')"><span>🦊</span><span class="cam-label">Fox</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb')"><span>🦆</span><span class="cam-label">Duck</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb')"><span>🐟</span><span class="cam-label">Fish</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb')"><span>🥑</span><span class="cam-label">Avo</span></div>
         </div>
 
-        <!-- FURNITURE SECTION -->
+        <!-- FURNITURE SECTION (ALL 3D) -->
         <div class="catalog-section">
           <span class="section-label">Home</span>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb', 'COUCH')"><span>🛋️</span><span class="cam-label">Couch</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb', 'CHAIR')"><span>🪑</span><span class="cam-label">Chair</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb', 'BOOMBOX')"><span>📻</span><span class="cam-label">Music</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb', 'LANTERN')"><span>🏮</span><span class="cam-label">Lamp</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🛏️', 'BED')"><span>🛏️</span><span class="cam-label">Bed</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🖥️', 'DESK')"><span>🖥️</span><span class="cam-label">Desk</span></div>
-          <div class="cam-item" onclick="addItem('emoji:📚', 'BOOKS')"><span>📚</span><span class="cam-label">Shelf</span></div>
-          <div class="cam-item" onclick="addItem('emoji:📺', 'TV')"><span>📺</span><span class="cam-label">TV</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🎹', 'PIANO')"><span>🎹</span><span class="cam-label">Piano</span></div>
-        </div>
-
-        <!-- NATURE & LIFE -->
-        <div class="catalog-section">
-          <span class="section-label">Life</span>
-          <div class="cam-item" onclick="addItem('emoji:🌲', 'TREE')"><span>🌲</span><span class="cam-label">Tree</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🌻', 'FLOWER')"><span>🌻</span><span class="cam-label">Flower</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🍕', 'PIZZA')"><span>🍕</span><span class="cam-label">Pizza</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🍦', 'ICE CREAM')"><span>🍦</span><span class="cam-label">Cream</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🍔', 'BURGER')"><span>🍔</span><span class="cam-label">Burger</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🍄', 'MUSHY')"><span>🍄</span><span class="cam-label">Mushy</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb')"><span>🛋️</span><span class="cam-label">Couch</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb')"><span>🪑</span><span class="cam-label">Chair</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb')"><span>📻</span><span class="cam-label">Music</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb')"><span>🏮</span><span class="cam-label">Lamp</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/AntiqueCamera/glTF-Binary/AntiqueCamera.glb')"><span>📷</span><span class="cam-label">Camera</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb')"><span>📦</span><span class="cam-label">Package</span></div>
         </div>
 
         <!-- EXTRAS -->
         <div class="catalog-section">
           <span class="section-label">Extra</span>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', 'HELMET')"><span>⛑️</span><span class="cam-label">Helmet</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb', 'BOX')"><span>📦</span><span class="cam-label">Box</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🪐', 'PLANET')"><span>🪐</span><span class="cam-label">Planet</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🚀', 'ROCKET')"><span>🚀</span><span class="cam-label">Rocket</span></div>
-          <div class="cam-item" onclick="addItem('emoji:🔥', 'FIRE')"><span>🔥</span><span class="cam-label">Fire</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb')"><span>⛑️</span><span class="cam-label">Helmet</span></div>
+          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Corset/glTF-Binary/Corset.glb')"><span>👗</span><span class="cam-label">Corset</span></div>
           <div class="cam-item" onclick="document.getElementById('file-in').click()"><span>🖼️</span><span class="cam-label">Upload</span></div>
         </div>
 
@@ -183,22 +173,26 @@
     const canvas = document.getElementById('ar-canvas-layer');
     const vFeed = document.getElementById('v-feed');
     const flash = document.getElementById('flash');
+    const mainMv = document.getElementById('main-view');
     
     let currentMode = 'play';
-    let selectedItem = null;
 
     const catalog = {
       play: [
         { name: 'Astro', icon: '🧑‍🚀', src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb' },
         { name: 'Robot', icon: '🤖', src: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb' },
         { name: 'Fox', icon: '🦊', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb' },
-        { name: 'Duck', icon: '🦆', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb' }
+        { name: 'Duck', icon: '🦆', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb' },
+        { name: 'Fish', icon: '🐟', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb' },
+        { name: 'Avo', icon: '🥑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb' }
       ],
       work: [
         { name: 'Couch', icon: '🛋️', src: 'https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb' },
         { name: 'Chair', icon: '🪑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb' },
         { name: 'Music', icon: '📻', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb' },
-        { name: 'Lamp', icon: '🏮', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb' }
+        { name: 'Lamp', icon: '🏮', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb' },
+        { name: 'Camera', icon: '📷', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/AntiqueCamera/glTF-Binary/AntiqueCamera.glb' },
+        { name: 'Package', icon: '📦', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb' }
       ]
     };
 
@@ -219,7 +213,7 @@
             card.onclick = () => {
                 document.querySelectorAll('.char-card').forEach(c => c.classList.remove('active', 'play', 'work'));
                 card.classList.add('active', currentMode);
-                document.getElementById('main-view').src = item.src;
+                mainMv.src = item.src;
             };
             scroller.appendChild(card);
         });
@@ -232,7 +226,7 @@
         try {
           const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
           vFeed.srcObject = s;
-          addItem(catalog[currentMode][0].src, catalog[currentMode][0].name);
+          addItem(mainMv.src);
         } catch(e) { exitAR(); }
     }
 
@@ -243,95 +237,59 @@
         clearAll();
     }
 
-    function addItem(src, label) {
+    function addItem(src) {
         const obj = document.createElement('div');
         obj.className = 'ar-object';
-        const offX = (Math.random() * 60) - 30;
-        const offY = (Math.random() * 60) - 30;
+        const offX = (Math.random() * 80) - 40;
+        const offY = (Math.random() * 80) - 40;
         obj.style.left = `calc(50% + ${offX}px)`;
         obj.style.top = `calc(40% + ${offY}px)`;
         
-        // Initial state
-        obj.style.setProperty('--sc', '1');
-        obj.style.setProperty('--rot', '0deg');
-        obj.style.transform = 'scale(var(--sc)) rotate(var(--rot))';
+        const mv = document.createElement('model-viewer');
+        mv.src = src;
+        mv.style.width = '100%';
+        mv.style.height = '100%';
+        mv.setAttribute('camera-controls', 'true');
+        mv.setAttribute('auto-rotate', '');
+        mv.setAttribute('shadow-intensity', '1');
+        mv.setAttribute('touch-action', 'pan-y');
+        obj.appendChild(mv);
         
-        if (src.startsWith('emoji:')) {
-            const emoji = src.replace('emoji:', '');
-            obj.innerHTML = `<div style="font-size: 7rem; filter: drop-shadow(0 0 10px white);">${emoji}</div>`;
-        } else {
-            const mv = document.createElement('model-viewer');
-            mv.src = src;
-            mv.style.width = '100%';
-            mv.style.height = '100%';
-            mv.setAttribute('auto-rotate', '');
-            mv.setAttribute('shadow-intensity', '1');
-            mv.setAttribute('camera-controls', 'none');
-            mv.setAttribute('touch-action', 'none');
-            obj.appendChild(mv);
-        }
-        
+        const handle = document.createElement('div');
+        handle.className = 'move-handle';
+        handle.innerHTML = '✥';
+        obj.appendChild(handle);
+
+        const del = document.createElement('div');
+        del.className = 'delete-handle';
+        del.innerHTML = '✕';
+        del.onclick = (e) => { e.stopPropagation(); obj.remove(); };
+        obj.appendChild(del);
+
         canvas.appendChild(obj);
-        attachGestures(obj);
-        selectObject(obj);
+        makeDraggable(obj, handle);
     }
 
-    function selectObject(el) {
-        if (!el) return;
-        selectedItem = el;
-        document.querySelectorAll('.ar-object').forEach(o => o.classList.remove('selected'));
-        el.classList.add('selected');
-    }
-
-    function attachGestures(el) {
+    function makeDraggable(parent, handle) {
+        let dragging = false;
         let startX, startY;
-        let initialScale = 1;
-        let initialRot = 0;
-        let startDist = 0;
-        let startAngle = 0;
         
-        el.addEventListener('touchstart', (e) => {
-            selectObject(el);
-            
-            if (e.touches.length === 1) {
-                startX = e.touches[0].clientX - el.offsetLeft;
-                startY = e.touches[0].clientY - el.offsetTop;
-            } else if (e.touches.length === 2) {
-                const t1 = e.touches[0];
-                const t2 = e.touches[1];
-                startDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-                startAngle = Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * 180 / Math.PI;
-                initialScale = parseFloat(el.style.getPropertyValue('--sc')) || 1;
-                initialRot = parseFloat(el.style.getPropertyValue('--rot')) || 0;
-            }
+        handle.addEventListener('touchstart', (e) => {
+            dragging = true;
+            startX = e.touches[0].clientX - parent.offsetLeft;
+            startY = e.touches[0].clientY - parent.offsetTop;
+            e.preventDefault();
+            e.stopPropagation();
         });
 
         window.addEventListener('touchmove', (e) => {
-            if (selectedItem !== el) return;
-            
-            if (e.touches.length === 1) {
-                // CLASSIC MOVE: Just drag with one finger
-                el.style.left = (e.touches[0].clientX - startX) + 'px';
-                el.style.top = (e.touches[0].clientY - startY) + 'px';
-            } else if (e.touches.length === 2) {
-                // CLASSIC TRANSFORM: Two fingers to scale and rotate
-                const t1 = e.touches[0];
-                const t2 = e.touches[1];
-                
-                // Scale
-                const currentDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-                const scale = (currentDist / startDist) * initialScale;
-                const finalScale = Math.min(Math.max(scale, 0.2), 6);
-                el.style.setProperty('--sc', finalScale);
-                
-                // Rotate
-                const currentAngle = Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * 180 / Math.PI;
-                const deltaRot = currentAngle - startAngle;
-                el.style.setProperty('--rot', (initialRot + deltaRot) + 'deg');
-            }
-            
-            el.style.transform = `scale(var(--sc)) rotate(var(--rot))`;
-        });
+            if (!dragging) return;
+            parent.style.left = (e.touches[0].clientX - startX) + 'px';
+            parent.style.top = (e.touches[0].clientY - startY) + 'px';
+            e.preventDefault();
+        }, { passive: false });
+
+        window.addEventListener('touchend', () => { dragging = false; });
     }
 
     function saveDesign() {
@@ -349,13 +307,18 @@
               const obj = document.createElement('div');
               obj.className = 'ar-object';
               obj.style.left = '50%'; obj.style.top = '40%';
-              obj.style.setProperty('--sc', '1');
-              obj.style.setProperty('--rot', '0deg');
-              obj.style.transform = 'scale(1) rotate(0deg)';
-              obj.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:15px;"><button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
+              obj.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:15px; filter: drop-shadow(0 0 10px white);">`;
+              const handle = document.createElement('div');
+              handle.className = 'move-handle';
+              handle.innerHTML = '✥';
+              obj.appendChild(handle);
+              const del = document.createElement('div');
+              del.className = 'delete-handle';
+              del.innerHTML = '✕';
+              del.onclick = () => obj.remove();
+              obj.appendChild(del);
               canvas.appendChild(obj);
-              attachGestures(obj);
-              selectObject(obj);
+              makeDraggable(obj, handle);
             }
             reader.readAsDataURL(input.files[0]);
         }
