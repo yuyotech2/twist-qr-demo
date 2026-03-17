@@ -222,8 +222,11 @@
         const off = (Math.random() * 80) - 40;
         obj.style.left = `calc(50% - 140px + ${off}px)`;
         obj.style.top = `calc(40% - 140px + ${off}px)`;
+        
+        // Ensure scale and rotation are initialized
         obj.style.setProperty('--sc', '1');
         obj.style.setProperty('--rot', '0deg');
+        obj.style.transform = 'scale(var(--sc)) rotate(var(--rot))';
         
         const mv = document.createElement('model-viewer');
         mv.src = src;
@@ -231,11 +234,20 @@
         mv.style.height = '100%';
         mv.setAttribute('auto-rotate', '');
         mv.setAttribute('shadow-intensity', '1');
+        mv.setAttribute('exposure', '1');
         mv.setAttribute('camera-controls', 'none'); 
         mv.setAttribute('touch-action', 'none');
         
+        const btn = document.createElement('button');
+        btn.className = 'delete-btn';
+        btn.innerHTML = '✕';
+        btn.onclick = (e) => { 
+            e.stopPropagation(); 
+            obj.remove(); 
+        };
+
         obj.appendChild(mv);
-        obj.innerHTML += `<button class="delete-btn" onclick="this.parentElement.remove()">✕</button>`;
+        obj.appendChild(btn);
         overlay.appendChild(obj);
         attachGestures(obj);
     }
