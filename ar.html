@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>TwistQR | AR Designer Pro 3D</title>
+  <title>TwistQR | AR Design Hub</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     :root {
@@ -17,9 +17,7 @@
 
     /* UI Containers */
     #main-menu { position: relative; height: 100vh; display: flex; flex-direction: column; z-index: 10; background: var(--bg); transition: 0.5s; }
-    #ar-camera-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000; background: #000; display: none; }
-    #v-feed { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-
+    
     /* Header */
     #header { padding: 15px; border-bottom: 2px solid var(--primary); text-align: center; background: rgba(0,0,0,0.9); }
     #header h1 { font-size: 0.8rem; letter-spacing: 5px; color: var(--primary); margin-bottom: 12px; font-weight: 900; text-transform: uppercase; }
@@ -34,8 +32,10 @@
     .preview-box { width: 280px; height: 280px; border-radius: 50px; border: 2px solid rgba(138,43,226,0.3); position: relative; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(138,43,226,0.1) 0%, transparent 70%); }
     model-viewer { width: 100%; height: 100%; }
     
-    .btn-launch { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 18px 40px; border-radius: 50px; font-weight: 900; font-size: 1rem; letter-spacing: 2px; margin-top: 20px; box-shadow: 0 10px 40px rgba(138,43,226,0.4); cursor: pointer; transition: 0.3s; width: 300px; }
-    .btn-secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px 30px; border-radius: 50px; font-weight: 900; font-size: 0.7rem; margin-top: 10px; cursor: pointer; }
+    .btn-launch { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 22px 50px; border-radius: 50px; font-weight: 900; font-size: 1.2rem; letter-spacing: 3px; margin-top: 40px; box-shadow: 0 10px 40px rgba(138,43,226,0.4); cursor: pointer; transition: 0.3s; width: 320px; }
+    .btn-launch:active { transform: scale(0.95); opacity: 0.8; }
+    
+    #native-hint { margin-top: 15px; color: #666; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 900; }
 
     /* Bottom Scroller Menu */
     #selector-strip { background: rgba(0,0,0,0.6); padding: 25px 0 45px; border-top: 1px solid rgba(255,255,255,0.05); }
@@ -46,61 +46,41 @@
     .char-card.active.work { border-color: var(--work-accent); background: rgba(76,175,80,0.1); }
     .char-card .icon { font-size: 2rem; }
 
-    /* AR Engine Styles */
-    #ar-canvas-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
-    
-    .ar-object { 
-      position: absolute; width: 280px; height: 280px; pointer-events: auto; touch-action: none; 
-      display: flex; align-items: center; justify-content: center;
-      transition: none;
-      z-index: 1002;
+    /* Custom AR Sticker Mode (For Fallback/Design) */
+    #custom-ar-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1000; background: #000; display: none; }
+    #v-feed { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+    #ar-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1001; }
+    .sticker { 
+        position: absolute; width: 250px; height: 250px; pointer-events: auto; touch-action: none;
+        display: flex; align-items: center; justify-content: center;
     }
-    
-    .move-handle {
-        position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
-        background: var(--primary); color: #000; width: 48px; height: 48px; 
+    .sticker-handle {
+        position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+        background: var(--primary); color: #000; width: 44px; height: 44px; 
         border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem; font-weight: bold; z-index: 2000; box-shadow: 0 4px 15px rgba(0,245,255,0.5);
-        cursor: grab; pointer-events: auto;
-    }
-    .delete-handle {
-        position: absolute; top: -10px; right: -10px;
-        background: var(--danger); color: white; width: 35px; height: 35px; 
-        border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        font-size: 1.2rem; font-weight: 900; z-index: 2000; pointer-events: auto;
+        font-size: 1.5rem; font-weight: bold; z-index: 10; box-shadow: 0 4px 15px rgba(0,245,255,0.5);
     }
 
-    /* Massive Catalog */
-    #in-cam-selector { 
+    /* Catalog in Camera */
+    #cam-catalog { 
       position: absolute; bottom: 120px; left: 0; width: 100%; height: 130px; 
       display: flex; gap: 12px; overflow-x: auto; padding: 20px; 
       pointer-events: auto; z-index: 1005; backdrop-filter: blur(25px);
       background: rgba(0,0,0,0.85); border-top: 2px solid rgba(255,255,255,0.1);
       align-items: center; scrollbar-width: none;
     }
-    .catalog-section { display: flex; gap: 12px; padding-right: 25px; border-right: 1px solid rgba(255,255,255,0.1); margin-right: 15px; height: 100%; align-items: center; }
-    .catalog-section:last-child { border-right: none; }
-    .section-label { writing-mode: vertical-lr; font-size: 0.5rem; color: #666; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; height: 80%; text-align: center; }
+    .cam-item { flex: 0 0 75px; height: 75px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
 
-    .cam-item { flex: 0 0 75px; height: 75px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.8rem; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; position: relative; cursor: pointer; }
-    .cam-item:active { transform: scale(0.9); background: rgba(255,245,255,0.15); }
-    .cam-label { font-size: 0.4rem; text-transform: uppercase; font-weight: 900; margin-top: 3px; color: #888; letter-spacing: 1px; }
-
-    .ar-bottom-controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; gap: 15px; pointer-events: auto; z-index: 1005; }
+    .ar-controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; gap: 15px; pointer-events: auto; z-index: 1005; }
     .ar-btn { background: rgba(0,0,0,0.85); border: 2px solid white; color: white; padding: 14px 28px; border-radius: 50px; font-weight: 900; font-size: 0.8rem; letter-spacing: 1px; cursor: pointer; }
-    
-    #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; opacity: 0; pointer-events: none; }
-    #status-msg { position: absolute; top: 80px; width: 100%; text-align: center; color: var(--primary); font-weight: 900; letter-spacing: 3px; text-shadow: 0 2px 15px black; pointer-events: none; z-index: 1001; }
   </style>
 </head>
 <body>
 
-  <div id="flash"></div>
-
   <div id="main-menu">
     <header id="header">
       <button onclick="window.location.href='index.html'" style="position:absolute; left:18px; top:12px; background:none; border:none; color:#444; font-size:1.5rem;">✕</button>
-      <h1>TWIST AR DESIGNER 3D</h1>
+      <h1>TWIST DESIGN SUPREME</h1>
       <div class="mode-toggle">
         <button id="mode-play" class="mode-btn active play" onclick="setMode('play')">SOULS</button>
         <button id="mode-work" class="mode-btn" onclick="setMode('work')">WORK</button>
@@ -113,67 +93,34 @@
             <button slot="ar-button" id="real-ar-btn" style="display:none;"></button>
         </model-viewer>
       </div>
-      <button class="btn-launch" onclick="enterAR()">🚀 LAUNCH 3D DESIGNER</button>
-      <button class="btn-secondary" onclick="document.getElementById('real-ar-btn').click()">📽️ VIEW NATIVE (SINGLE ITEM)</button>
+      <!-- THIS IS THE BUTTON FOR THE "OLD WAY" (Native) -->
+      <button class="btn-launch" onclick="launchNative()">🚀 LAUNCH AR (OLD WAY)</button>
+      <p id="native-hint">Best for real interaction & movement</p>
+      
+      <!-- THIS IS THE BUTTON FOR THE MULTI-DESIGNER -->
+      <button class="btn-launch" style="background: rgba(255,255,255,0.1); border: 1px solid white; margin-top:20px;" onclick="enterDesigner()">🛠️ PHOTO DESIGNER</button>
     </div>
 
     <div id="selector-strip"><div id="scroller" class="scroller"></div></div>
   </div>
 
-  <div id="ar-camera-view">
+  <!-- Custom Designer View -->
+  <div id="custom-ar-view">
     <video id="v-feed" autoplay playsinline></video>
-    <div id="ar-canvas-layer"></div>
-    <div id="status-msg">3D MULTI-ENGINE ACTIVE</div>
-
-    <div id="in-cam-selector">
-        
-        <!-- SOULS SECTION (ALL 3D) -->
-        <div class="catalog-section">
-          <span class="section-label">Souls</span>
-          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/Astronaut.glb')"><span>🧑‍🚀</span><span class="cam-label">Astro</span></div>
-          <div class="cam-item" onclick="addItem('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb')"><span>🤖</span><span class="cam-label">Robot</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb')"><span>🦊</span><span class="cam-label">Fox</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb')"><span>🦆</span><span class="cam-label">Duck</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb')"><span>🐟</span><span class="cam-label">Fish</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb')"><span>🥑</span><span class="cam-label">Avo</span></div>
-        </div>
-
-        <!-- FURNITURE SECTION (ALL 3D) -->
-        <div class="catalog-section">
-          <span class="section-label">Home</span>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb')"><span>🛋️</span><span class="cam-label">Couch</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb')"><span>🪑</span><span class="cam-label">Chair</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb')"><span>📻</span><span class="cam-label">Music</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb')"><span>🏮</span><span class="cam-label">Lamp</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/AntiqueCamera/glTF-Binary/AntiqueCamera.glb')"><span>📷</span><span class="cam-label">Camera</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb')"><span>📦</span><span class="cam-label">Package</span></div>
-        </div>
-
-        <!-- EXTRAS -->
-        <div class="catalog-section">
-          <span class="section-label">Extra</span>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb')"><span>⛑️</span><span class="cam-label">Helmet</span></div>
-          <div class="cam-item" onclick="addItem('https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Corset/glTF-Binary/Corset.glb')"><span>👗</span><span class="cam-label">Corset</span></div>
-          <div class="cam-item" onclick="document.getElementById('file-in').click()"><span>🖼️</span><span class="cam-label">Upload</span></div>
-        </div>
-
+    <div id="ar-canvas"></div>
+    <div id="cam-catalog"></div>
+    <div class="ar-controls">
+        <button class="ar-btn" onclick="exitDesigner()" style="background: var(--danger);">✕ EXIT</button>
     </div>
-
-    <div class="ar-bottom-controls">
-        <button class="ar-btn" onclick="clearAll()" style="border-color: var(--danger); color: var(--danger);">RESET ROOM</button>
-        <button class="ar-btn" onclick="exitAR()" style="background: var(--danger);">✕ EXIT</button>
-        <button class="ar-btn" onclick="saveDesign()">SAVE SNAPSHOT</button>
-    </div>
-    <input type="file" id="file-in" style="display:none" onchange="uploadToAR(this)">
   </div>
 
   <script>
     const menu = document.getElementById('main-menu');
-    const camera = document.getElementById('ar-camera-view');
-    const canvas = document.getElementById('ar-canvas-layer');
-    const vFeed = document.getElementById('v-feed');
-    const flash = document.getElementById('flash');
     const mainMv = document.getElementById('main-view');
+    const designer = document.getElementById('custom-ar-view');
+    const canvas = document.getElementById('ar-canvas');
+    const vFeed = document.getElementById('v-feed');
+    const camCat = document.getElementById('cam-catalog');
     
     let currentMode = 'play';
 
@@ -182,17 +129,12 @@
         { name: 'Astro', icon: '🧑‍🚀', src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb' },
         { name: 'Robot', icon: '🤖', src: 'https://modelviewer.dev/shared-assets/models/RobotExpressive.glb' },
         { name: 'Fox', icon: '🦊', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb' },
-        { name: 'Duck', icon: '🦆', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb' },
-        { name: 'Fish', icon: '🐟', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BarramundiFish/glTF-Binary/BarramundiFish.glb' },
-        { name: 'Avo', icon: '🥑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF-Binary/Avocado.glb' }
+        { name: 'Duck', icon: '🦆', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb' }
       ],
       work: [
         { name: 'Couch', icon: '🛋️', src: 'https://raw.githubusercontent.com/ks1505/ma/master/sofa.glb' },
         { name: 'Chair', icon: '🪑', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SheenChair/glTF-Binary/SheenChair.glb' },
-        { name: 'Music', icon: '📻', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoomBox/glTF-Binary/BoomBox.glb' },
-        { name: 'Lamp', icon: '🏮', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF-Binary/Lantern.glb' },
-        { name: 'Camera', icon: '📷', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/AntiqueCamera/glTF-Binary/AntiqueCamera.glb' },
-        { name: 'Package', icon: '📦', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb' }
+        { name: 'Box', icon: '📦', src: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb' }
       ]
     };
 
@@ -220,108 +162,63 @@
         if(scroller.firstChild) scroller.firstChild.click();
     }
 
-    async function enterAR() {
+    // THE OLD WAY (NATIVE WebXR)
+    function launchNative() {
+        document.getElementById('real-ar-btn').click();
+    }
+
+    // THE DESIGNER WAY (MULTI-PHOTO)
+    async function enterDesigner() {
         menu.style.display = 'none';
-        camera.style.display = 'block';
+        designer.style.display = 'block';
         try {
-          const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-          vFeed.srcObject = s;
-          addItem(mainMv.src);
-        } catch(e) { exitAR(); }
+            const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            vFeed.srcObject = s;
+            renderCamCatalog();
+        } catch(e) { exitDesigner(); }
     }
 
-    function exitAR() {
+    function exitDesigner() {
         menu.style.display = 'flex';
-        camera.style.display = 'none';
-        if (vFeed.srcObject) vFeed.srcObject.getTracks().forEach(t => t.stop());
-        clearAll();
+        designer.style.display = 'none';
+        if(vFeed.srcObject) vFeed.srcObject.getTracks().forEach(t => t.stop());
+        canvas.innerHTML = '';
     }
 
-    function addItem(src) {
-        const obj = document.createElement('div');
-        obj.className = 'ar-object';
-        const offX = (Math.random() * 80) - 40;
-        const offY = (Math.random() * 80) - 40;
-        obj.style.left = `calc(50% + ${offX}px)`;
-        obj.style.top = `calc(40% + ${offY}px)`;
-        
-        const mv = document.createElement('model-viewer');
-        mv.src = src;
-        mv.style.width = '100%';
-        mv.style.height = '100%';
-        mv.setAttribute('camera-controls', 'true');
-        mv.setAttribute('auto-rotate', '');
-        mv.setAttribute('shadow-intensity', '1');
-        mv.setAttribute('touch-action', 'pan-y');
-        obj.appendChild(mv);
-        
-        const handle = document.createElement('div');
-        handle.className = 'move-handle';
-        handle.innerHTML = '✥';
-        obj.appendChild(handle);
-
-        const del = document.createElement('div');
-        del.className = 'delete-handle';
-        del.innerHTML = '✕';
-        del.onclick = (e) => { e.stopPropagation(); obj.remove(); };
-        obj.appendChild(del);
-
-        canvas.appendChild(obj);
-        makeDraggable(obj, handle);
-    }
-
-    function makeDraggable(parent, handle) {
-        let dragging = false;
-        let startX, startY;
-        
-        handle.addEventListener('touchstart', (e) => {
-            dragging = true;
-            startX = e.touches[0].clientX - parent.offsetLeft;
-            startY = e.touches[0].clientY - parent.offsetTop;
-            e.preventDefault();
-            e.stopPropagation();
+    function renderCamCatalog() {
+        camCat.innerHTML = '';
+        catalog[currentMode].forEach(item => {
+            let div = document.createElement('div');
+            div.className = 'cam-item';
+            div.innerHTML = item.icon;
+            div.onclick = () => addSticker(item.icon);
+            camCat.appendChild(div);
         });
+    }
 
+    function addSticker(icon) {
+        const s = document.createElement('div');
+        s.className = 'sticker';
+        s.style.left = '40%'; s.style.top = '40%';
+        s.innerHTML = `<div style="font-size: 8rem;">${icon}</div><div class="sticker-handle">✥</div>`;
+        canvas.appendChild(s);
+        makeDraggable(s);
+    }
+
+    function makeDraggable(el) {
+        let dragging = false;
+        let sx, sy;
+        el.addEventListener('touchstart', (e) => {
+            dragging = true;
+            sx = e.touches[0].clientX - el.offsetLeft;
+            sy = e.touches[0].clientY - el.offsetTop;
+        });
         window.addEventListener('touchmove', (e) => {
-            if (!dragging) return;
-            parent.style.left = (e.touches[0].clientX - startX) + 'px';
-            parent.style.top = (e.touches[0].clientY - startY) + 'px';
-            e.preventDefault();
-        }, { passive: false });
-
-        window.addEventListener('touchend', () => { dragging = false; });
-    }
-
-    function saveDesign() {
-      flash.style.opacity = '1';
-      setTimeout(() => flash.style.opacity = '0', 200);
-      alert('📸 Design Saved!');
-    }
-
-    function clearAll() { canvas.innerHTML = ''; }
-
-    function uploadToAR(input) {
-        if (input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-              const obj = document.createElement('div');
-              obj.className = 'ar-object';
-              obj.style.left = '50%'; obj.style.top = '40%';
-              obj.innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:15px; filter: drop-shadow(0 0 10px white);">`;
-              const handle = document.createElement('div');
-              handle.className = 'move-handle';
-              handle.innerHTML = '✥';
-              obj.appendChild(handle);
-              const del = document.createElement('div');
-              del.className = 'delete-handle';
-              del.innerHTML = '✕';
-              del.onclick = () => obj.remove();
-              obj.appendChild(del);
-              canvas.appendChild(obj);
-              makeDraggable(obj, handle);
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
+            if(!dragging) return;
+            el.style.left = (e.touches[0].clientX - sx) + 'px';
+            el.style.top = (e.touches[0].clientY - sy) + 'px';
+        });
+        window.addEventListener('touchend', () => dragging = false);
     }
 
     setMode('play');
